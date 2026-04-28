@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نموذج إدخال بنود الصيانة</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: #f4f4f9; color: #333; margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { text-align: center; color: #444; }
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; margin-top: 30px; }
+        .grid-item { position: relative; background-color: #fff; border: 2px solid #ddd; border-radius: 8px; text-align: center; transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; justify-content: space-between; height: 220px; padding: 10px; }
+        .grid-item:hover { transform: translateY(-5px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .grid-item.selected { border-color: #4CAF50; background-color: #f1fff2; }
+        .grid-item img { max-width: 90px; height: 90px; margin: 10px auto; display: block; border-radius: 5px; object-fit: cover; cursor: pointer; }
+        .grid-item p { font-size: 14px; margin: 0; flex-grow: 1; cursor: pointer; }
+        .edit-button { position: absolute; top: 5px; left: 5px; width: 25px; height: 25px; background-color: rgba(0,0,0,0.1); border: none; border-radius: 50%; cursor: pointer; font-size: 16px; line-height: 25px; text-align: center; z-index: 10; }
+        .selection-checkbox { position: absolute; top: 5px; right: 5px; width: 25px; height: 25px; cursor: pointer; }
+        .button-container { text-align: center; margin-top: 40px; margin-bottom: 40px; display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; }
+        .action-button { color: white; padding: 15px 25px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background-color 0.2s; }
+        .generate-button { background-color: #4CAF50; }
+        .add-button { background-color: #007bff; }
+        .trash-button { background-color: #6c757d; }
+        .adhoc-button { background-color: #ffc107; color: black; }
+        .inspection-button { background-color: #17a2b8; }
+        .data-export-button { background-color: #20c997; }
+        .data-import-button { background-color: #6f42c1; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background-color: #fff; padding: 25px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto; }
+        .modal-content h2 { margin-top: 0; margin-bottom: 20px; }
+        .modal-buttons { margin-top: 20px; display: flex; justify-content: space-between; }
+        .modal-buttons button, .item-buttons button { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        .modal-content label { display: block; margin-top: 15px; margin-bottom: 5px; font-weight: bold; }
+        .modal-content input, .modal-content textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .modal-content textarea { min-height: 150px; resize: vertical; }
+        .save-btn { background-color: #28a745; color: white; margin-left: 10px; }
+        .cancel-btn { background-color: #6c757d; color: white; }
+        .delete-btn { background-color: #dc3545; color: white; }
+        .add-point-btn { padding: 2px 8px; font-size: 18px; margin-right: 10px; }
+        .dynamic-list { list-style-type: none; padding: 0; }
+        .dynamic-list li { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; }
+        .item-title { flex-grow: 1; margin: 0 10px; }
+        .item-buttons button { padding: 5px 10px; font-size: 14px; margin-left: 5px; color: white; }
+        .restore-btn { background-color: #28a745; }
+        .perm-delete-btn { background-color: #dc3545; }
+        footer { text-align: center; margin-top: 50px; padding: 20px; font-size: 14px; color: #888; border-top: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>نموذج بنود الصيانة</h1>
+        <div id="itemsGrid" class="grid-container"></div>
+        <div class="button-container">
+            <button onclick="openNewItemModal()" class="action-button add-button">(+) إضافة بند</button>
+            <button onclick="openAdHocModal()" class="action-button adhoc-button">عرض الإضافات</button>
+            <button onclick="openInspectionReportModal()" class="action-button inspection-button">عمل تقرير كشف</button>
+            <button onclick="openTrashModal()" class="action-button trash-button">🗑️ المحذوفات</button>
+            <button onclick="generateItemsReport()" class="action-button generate-button">إنشاء تقرير بنود</button>
+            <button onclick="exportData()" class="action-button data-export-button">تصدير البيانات</button>
+            <button onclick="importData()" class="action-button data-import-button">استيراد البيانات</button>
+        </div>
+    </div>
+
+    <div id="editModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 id="modalTitle"></h2>
+            <label for="editTitle">العنوان:</label><input type="text" id="editTitle">
+            <label for="editLongDesc">الوصف التفصيلي:</label><textarea id="editLongDesc"></textarea>
+            <label for="editImageUrl">رابط الصورة:</label><input type="text" id="editImageUrl">
+            <label for="editCode">الكود:</label><input type="text" id="editCode">
+            <label for="editUnit">الوحدة:</label><input type="text" id="editUnit">
+            <div class="modal-buttons">
+                <div><button id="saveBtn" class="save-btn">حفظ</button><button onclick="closeEditModal()" class="cancel-btn">إلغاء</button></div>
+                <button id="deleteBtn" class="delete-btn">حذف</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="trashModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>البنود المحذوفة</h2>
+            <ul id="trashList" class="dynamic-list"></ul>
+            <div class="modal-buttons" style="justify-content: flex-end;"><button onclick="closeTrashModal()" class="cancel-btn">إغلاق</button></div>
+        </div>
+    </div>
+    
+    <div id="adHocModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>الإضافات الحرة</h2>
+            <ul id="adHocList" class="dynamic-list"></ul>
+            <div class="modal-buttons" style="justify-content: flex-end;"><button onclick="closeAdHocModal()" class="cancel-btn">إغلاق</button></div>
+        </div>
+    </div>
+
+    <div id="inspectionReportModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>تقرير كشف مسجد</h2>
+            <label for="inspectionMosqueNum">رقم المسجد:</label><input type="text" id="inspectionMosqueNum">
+            <label for="inspectionArea">المنطقة:</label><input type="text" id="inspectionArea">
+            <div><label for="inspectionNotes" style="display: inline-block;">التقرير والملاحظات:</label><button onclick="addPointToReport()" class="add-point-btn">+</button></div>
+            <textarea id="inspectionNotes"></textarea>
+            <div class="modal-buttons">
+                <button onclick="saveAndExportInspectionReport()" class="save-btn">حفظ واستخراج</button>
+                <button onclick="closeInspectionReportModal()" class="cancel-btn">إغلاق</button>
+            </div>
+        </div>
+    </div>
+    
+    <input type="file" id="importFileInput" accept=".json" style="display: none;">
+    
+    <footer>
+        <p>تم انشاء هذا البرنامج بواسطة المهندس نصار وائل نصار عن طريق استخدام الذكاء الاصطناعي.</p>
+    </footer>
+
+    <script>
+        let itemsData = [], trashData = [], adHocItems = [], inspectionReports = [];
+        const userSelections = {};
+        const initialData = [
+            {"مسلسل":1.0,"CODE":"E-A-01","Title":"مفتاح انارة مفرد","LongDescription":"","Unit":"عدد", "ImageUrl": ""},
+            {"مسلسل":2.0,"CODE":"E-A-02","Title":"مفتاح انارة مجوز","LongDescription":"","Unit":"عدد", "ImageUrl": ""},
+            {"مسلسل":3.0,"CODE":"E-A-03","Title":"مفتاح انارة ثلاثي","LongDescription":"","Unit":"عدد", "ImageUrl": ""}
+        ];
+        
+        function loadAllData() {
+            itemsData = JSON.parse(localStorage.getItem('maintenanceItems')) || initialData;
+            trashData = JSON.parse(localStorage.getItem('maintenanceItems_trash')) || [];
+            inspectionReports = JSON.parse(localStorage.getItem('maintenanceInspectionReports')) || [];
+            adHocItems = JSON.parse(sessionStorage.getItem('maintenanceAdHocItems')) || [];
+            Object.assign(userSelections, JSON.parse(sessionStorage.getItem('maintenanceSelections')) || {});
+        }
+
+        function saveAllData() {
+            localStorage.setItem('maintenanceItems', JSON.stringify(itemsData));
+            localStorage.setItem('maintenanceItems_trash', JSON.stringify(trashData));
+            localStorage.setItem('maintenanceInspectionReports', JSON.stringify(inspectionReports));
+            sessionStorage.setItem('maintenanceAdHocItems', JSON.stringify(adHocItems));
+            sessionStorage.setItem('maintenanceSelections', JSON.stringify(userSelections));
+        }
+
+        function renderItems() {
+            const itemsGrid = document.getElementById('itemsGrid');
+            itemsGrid.innerHTML = '';
+            itemsData.sort((a, b) => a['مسلسل'] - b['مسلسل']);
+            itemsData.forEach(item => itemsGrid.appendChild(createGridItem(item)));
+            itemsGrid.appendChild(createAdHocItemBox());
+            updateVisualSelections();
+        }
+
+        function createGridItem(item) {
+            const gridItem = document.createElement('div');
+            gridItem.className = 'grid-item'; gridItem.id = `item-${item['مسلسل']}`;
+            const editBtn = document.createElement('button');
+            editBtn.className = 'edit-button'; editBtn.innerHTML = '&#9881;';
+            editBtn.onclick = (e) => { e.stopPropagation(); openEditModal(item['مسلسل']); };
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox'; checkbox.className = 'selection-checkbox'; checkbox.id = `check-${item['مسلسل']}`;
+            checkbox.onchange = () => toggleItemSelection(item['مسلسل']);
+            const img = document.createElement('img');
+            img.src = item.ImageUrl || `https://via.placeholder.com/150/808080/FFFFFF?text=Item`;
+            img.alt = item.Title;
+            const title = document.createElement('p');
+            title.textContent = item.Title;
+            gridItem.appendChild(editBtn); gridItem.appendChild(checkbox); gridItem.appendChild(img); gridItem.appendChild(title);
+            return gridItem;
+        }
+
+        function createAdHocItemBox() {
+            const gridItem = document.createElement('div');
+            gridItem.className = 'grid-item'; gridItem.style.cursor = 'pointer';
+            gridItem.onclick = addAdHocItem;
+            gridItem.innerHTML = `<img src="https://via.placeholder.com/150/ffc107/000000?text=%2B" alt="إضافات حرة"><p style="font-weight: bold;">إضافة حرة</p>`;
+            return gridItem;
+        }
+        
+        function updateVisualSelections() {
+            document.querySelectorAll('.grid-item').forEach(el => el.classList.remove('selected'));
+            document.querySelectorAll('.selection-checkbox').forEach(cb => cb.checked = false);
+            for (const itemId in userSelections) {
+                const checkEl = document.getElementById(`check-${itemId}`);
+                if (checkEl) {
+                    checkEl.checked = true;
+                    checkEl.parentElement.classList.add('selected');
+                }
+            }
+        }
+        
+        function toggleItemSelection(itemId) {
+            const checkbox = document.getElementById(`check-${itemId}`);
+            if (checkbox.checked) {
+                const item = itemsData.find(i => i['مسلسل'] === itemId);
+                const currentQty = userSelections[itemId] ? userSelections[itemId].quantity : 1;
+                const notes = prompt(`أدخل الملاحظات (إن وجدت):`, userSelections[itemId] ? userSelections[itemId].notes : '');
+                const quantity = prompt(`أدخل الكمية للبند:\n"${item.Title}"`, currentQty);
+                if (quantity === null || isNaN(quantity) || parseInt(quantity, 10) <= 0) { checkbox.checked = false; return; }
+                userSelections[itemId] = { quantity: parseInt(quantity, 10), notes: notes || '' };
+            } else { delete userSelections[itemId]; }
+            saveAllData();
+            updateVisualSelections();
+        }
+
+        function addAdHocItem() {
+            const description = prompt("أدخل وصف البند المضاف:");
+            if (!description) return;
+            const quantity = prompt("أدخل الكمية:", 1);
+            if (quantity === null || isNaN(quantity) || parseInt(quantity, 10) <= 0) return;
+            const notes = prompt("أدخل الملاحظات (إن وجدت):");
+            adHocItems.push({ id: Date.now(), Title: description, quantity: parseInt(quantity, 10), notes: notes || '', isSelected: true });
+            saveAllData();
+            alert(`تمت إضافة "${description}" إلى قائمة الإضافات.`);
+        }
+        
+        function exportData() {
+            const dataBundle = {
+                items: itemsData,
+                trash: trashData,
+                reports: inspectionReports
+            };
+            const dataString = JSON.stringify(dataBundle, null, 2);
+            const blob = new Blob([dataString], { type: 'application/json' });
+            const link = document.createElement("a");
+            link.setAttribute("href", URL.createObjectURL(blob));
+            link.setAttribute("download", "maintenance_data.json");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            alert('تم تصدير ملف البيانات (maintenance_data.json) بنجاح.');
+        }
+
+        function importData() {
+            document.getElementById('importFileInput').click();
+        }
+
+        function handleFileImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    if (importedData.items && importedData.trash && importedData.reports) {
+                        itemsData = importedData.items || initialData;
+                        trashData = importedData.trash || [];
+                        inspectionReports = importedData.reports || [];
+                        
+                        saveAllData();
+                        renderItems();
+                        alert('تم استيراد البيانات بنجاح!');
+                    } else {
+                        alert('خطأ: صيغة ملف البيانات غير صحيحة.');
+                    }
+                } catch (error) {
+                    alert('خطأ: الملف غير صالح أو تالف. لم يتم استيراد البيانات.');
+                }
+            };
+            reader.readAsText(file);
+            // Reset file input to allow re-importing the same file if needed
+            event.target.value = '';
+        }
+
+        // --- ALL OTHER FUNCTIONS ---
+        
+        function openNewItemModal() {
+            document.getElementById('modalTitle').innerText = "إضافة بند جديد";
+            ['editTitle', 'editLongDesc', 'editImageUrl', 'editCode', 'editUnit'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('deleteBtn').style.display = 'none';
+            document.getElementById('saveBtn').onclick = () => addNewItem();
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        function openEditModal(itemId) {
+            const item = itemsData.find(i => i['مسلسل'] === itemId);
+            if (!item) return;
+            document.getElementById('modalTitle').innerText = "تحرير البند";
+            document.getElementById('editTitle').value = item.Title;
+            document.getElementById('editLongDesc').value = item.LongDescription || '';
+            document.getElementById('editImageUrl').value = item.ImageUrl || '';
+            document.getElementById('editCode').value = item.CODE;
+            document.getElementById('editUnit').value = item.Unit;
+            document.getElementById('deleteBtn').style.display = 'block';
+            document.getElementById('saveBtn').onclick = () => saveEditedItem(itemId);
+            document.getElementById('deleteBtn').onclick = () => deleteItem(itemId);
+            document.getElementById('editModal').style.display = 'flex';
+        }
+        
+        function closeEditModal() { document.getElementById('editModal').style.display = 'none'; }
+        
+        function addNewItem() {
+            const allIds = [...itemsData, ...trashData].map(i => i['مسلسل']);
+            const maxId = Math.max(0, ...allIds);
+            itemsData.push({
+                'مسلسل': maxId + 1, Title: document.getElementById('editTitle').value, LongDescription: document.getElementById('editLongDesc').value,
+                ImageUrl: document.getElementById('editImageUrl').value, CODE: document.getElementById('editCode').value, Unit: document.getElementById('editUnit').value,
+            });
+            saveAllData(); renderItems(); closeEditModal();
+        }
+
+        function saveEditedItem(itemId) {
+            const idx = itemsData.findIndex(i => i['مسلسل'] === itemId);
+            if (idx > -1) {
+                Object.assign(itemsData[idx], {
+                    Title: document.getElementById('editTitle').value, LongDescription: document.getElementById('editLongDesc').value,
+                    ImageUrl: document.getElementById('editImageUrl').value, CODE: document.getElementById('editCode').value, Unit: document.getElementById('editUnit').value,
+                });
+                saveAllData(); renderItems(); closeEditModal();
+            }
+        }
+
+        function deleteItem(itemId) {
+            if (confirm(`هل أنت متأكد؟ سيتم نقل البند إلى سلة المحذوفات.`)) {
+                const idx = itemsData.findIndex(i => i['مسلسل'] === itemId);
+                if (idx > -1) {
+                    trashData.push(itemsData.splice(idx, 1)[0]);
+                    delete userSelections[itemId];
+                    saveAllData(); renderItems(); closeEditModal();
+                }
+            }
+        }
+        
+        function openTrashModal() {
+            const list = document.getElementById('trashList');
+            list.innerHTML = trashData.length === 0 ? '<li>سلة المحذوفات فارغة.</li>' : '';
+            trashData.forEach(item => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span class="item-title">${item.Title}</span><div class="item-buttons"><button class="restore-btn" onclick="restoreItem(${item['مسلسل']})">استرجاع</button><button class="perm-delete-btn" onclick="deletePermanently(${item['مسلسل']})">حذف نهائي</button></div>`;
+                list.appendChild(li);
+            });
+            document.getElementById('trashModal').style.display = 'flex';
+        }
+        
+        function closeTrashModal() { document.getElementById('trashModal').style.display = 'none'; }
+        
+        function restoreItem(itemId) {
+            const idx = trashData.findIndex(i => i['مسلسل'] === itemId);
+            if (idx > -1) {
+                itemsData.push(trashData.splice(idx, 1)[0]);
+                saveAllData(); renderItems(); closeTrashModal();
+            }
+        }
+        
+        function deletePermanently(itemId) {
+            if (confirm(`هل أنت متأكد؟ سيتم حذف هذا البند بشكل نهائي.`)) {
+                const idx = trashData.findIndex(i => i['مسلسل'] === itemId);
+                if (idx > -1) { trashData.splice(idx, 1); saveAllData(); openTrashModal(); }
+            }
+        }
+        
+        function openAdHocModal() {
+            const list = document.getElementById('adHocList');
+            list.innerHTML = adHocItems.length === 0 ? '<li>لا توجد إضافات حالية.</li>' : '';
+            adHocItems.forEach(item => {
+                const li = document.createElement('li');
+                li.innerHTML = `<input type="checkbox" onchange="toggleAdHocSelection(${item.id})" ${item.isSelected ? 'checked' : ''}><span class="item-title">${item.Title} (الكمية: ${item.quantity})</span><div class="item-buttons"><button class="perm-delete-btn" onclick="deleteAdHocItem(${item.id})">حذف</button></div>`;
+                list.appendChild(li);
+            });
+            document.getElementById('adHocModal').style.display = 'flex';
+        }
+
+        function closeAdHocModal() { document.getElementById('adHocModal').style.display = 'none'; }
+        
+        function toggleAdHocSelection(itemId) {
+            const item = adHocItems.find(i => i.id === itemId);
+            if (item) { item.isSelected = !item.isSelected; saveAllData(); }
+        }
+
+        function deleteAdHocItem(itemId) {
+            const idx = adHocItems.findIndex(i => i.id === itemId);
+            if (idx > -1) { adHocItems.splice(idx, 1); saveAllData(); openAdHocModal(); }
+        }
+
+        function openInspectionReportModal() {
+            document.getElementById('inspectionMosqueNum').value = '';
+            document.getElementById('inspectionArea').value = '';
+            document.getElementById('inspectionNotes').value = '';
+            document.getElementById('inspectionReportModal').style.display = 'flex';
+        }
+
+        function closeInspectionReportModal() { document.getElementById('inspectionReportModal').style.display = 'none'; }
+
+        function addPointToReport() {
+            const textarea = document.getElementById('inspectionNotes');
+            textarea.value += "\n- ";
+            textarea.focus();
+        }
+
+        function saveAndExportInspectionReport() {
+            const mosqueNum = document.getElementById('inspectionMosqueNum').value;
+            const area = document.getElementById('inspectionArea').value;
+            const notes = document.getElementById('inspectionNotes').value;
+            if (!mosqueNum && !area && !notes) { alert("الرجاء ملء حقل واحد على الأقل."); return; }
+            const report = { id: Date.now(), mosqueNum, area, notes, date: new Date().toISOString() };
+            inspectionReports.push(report);
+            saveAllData();
+            const textContent = `تقرير كشف مسجد\n====================\nرقم المسجد: ${report.mosqueNum}\nالمنطقة: ${report.area}\nتاريخ التقرير: ${new Date(report.date).toLocaleDateString('ar-EG')}\n====================\n\nالملاحظات:\n--------------------\n${report.notes}`;
+            const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.setAttribute("href", URL.createObjectURL(blob));
+            link.setAttribute("download", `تقرير كشف ${report.mosqueNum || 'جديد'}.txt`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            alert("تم حفظ واستخراج التقرير بنجاح.");
+            closeInspectionReportModal();
+        }
+        
+        function formatLongTextForExcel(text, wordsPerLine = 25) {
+            if (!text || typeof text !== 'string') return '';
+            const words = text.split(/\s+/); let newText = '';
+            for (let i = 0; i < words.length; i++) {
+                newText += words[i] + ' ';
+                if ((i + 1) % wordsPerLine === 0 && i < words.length - 1) newText += '\n';
+            }
+            return newText.trim();
+        }
+
+        function generateItemsReport() {
+            const selectedStandard = Object.keys(userSelections).length > 0;
+            const selectedAdHoc = adHocItems.some(i => i.isSelected);
+            if (!selectedStandard && !selectedAdHoc) { alert("لم يتم اختيار أي بنود."); return; }
+            let fileName = prompt("الرجاء إدخال اسم لملف تقرير البنود:", "تقرير_بنود_الصيانة");
+            if (!fileName) fileName = "تقرير_بنود_الصيانة";
+            let csvContent = "مسلسل,CODE,العنوان,الوصف التفصيلي,Unit,QTY,الملاحظات\n";
+            const escapeCSV = (str) => `"${String(str || '').replace(/"/g, '""')}"`;
+            itemsData.sort((a,b) => a['مسلسل'] - b['مسلسل']).forEach(item => {
+                const selection = userSelections[item['مسلسل']];
+                if (selection) {
+                    const row = [item['مسلسل'], item.CODE, item.Title, formatLongTextForExcel(item.LongDescription), item.Unit, selection.quantity, selection.notes].map(escapeCSV).join(',');
+                    csvContent += row + "\n";
+                }
+            });
+            const includedAdHoc = adHocItems.filter(i => i.isSelected);
+            if (includedAdHoc.length > 0) {
+                csvContent += "\n--- إضافات حرة ---\n";
+                includedAdHoc.forEach(item => {
+                    const row = ["-", "AD-HOC", item.Title, "", "", item.quantity, item.notes].map(escapeCSV).join(',');
+                    csvContent += row + "\n";
+                });
+            }
+            const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.setAttribute("href", URL.createObjectURL(blob));
+            link.setAttribute("download", `${fileName}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        // --- INITIALIZATION ---
+        window.onload = () => {
+            loadAllData();
+            renderItems();
+            document.getElementById('importFileInput').addEventListener('change', handleFileImport);
+        };
+        document.querySelectorAll('.modal-overlay').forEach(modal => {
+            modal.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
+        });
+    </script>
+</body>
+</html>
