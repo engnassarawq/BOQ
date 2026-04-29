@@ -5,9 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نموذج إدخال بنود الصيانة</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: #f4f4f9; color: #333; margin: 0; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        h1 { text-align: center; color: #444; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            background-color: #800000; /* Maroon */
+            color: #333; 
+            margin: 0; 
+            padding: 20px; 
+        }
+        .container { 
+            max-width: 1200px; 
+            margin: 20px auto; 
+            background-color: #ffffff; /* White card for content */
+            padding: 20px 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        }
+        .date-display { text-align: left; font-size: 14px; color: #888; margin-bottom: 15px; padding-left: 10px; }
+        .subtitle { text-align: center; font-size: 18px; font-weight: normal; color: #555; margin-bottom: 0; margin-top: 10px; }
+        h1 { text-align: center; color: #444; margin-top: 5px;}
+        .counters-container { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+        .counter-box { background-color: #fff; padding: 15px; margin: 10px 0; border-radius: 8px; text-align: center; font-size: 18px; font-weight: bold; cursor: pointer; width: 100%; max-width: 400px; transition: all 0.2s; }
+        .counter-box:hover { transform: scale(1.02); color: white; }
+        #completedReportsCounter { border: 2px solid #007bff; color: #007bff; }
+        #completedReportsCounter:hover { background-color: #007bff; }
+        #inspectionReportsCounter { border: 2px solid #17a2b8; color: #17a2b8; }
+        #inspectionReportsCounter:hover { background-color: #17a2b8; }
         .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; margin-top: 30px; }
         .grid-item { position: relative; background-color: #fff; border: 2px solid #ddd; border-radius: 8px; text-align: center; transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; justify-content: space-between; height: 220px; padding: 10px; }
         .grid-item:hover { transform: translateY(-5px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
@@ -38,8 +60,10 @@
         .delete-btn { background-color: #dc3545; color: white; }
         .add-point-btn { padding: 2px 8px; font-size: 18px; margin-right: 10px; }
         .dynamic-list { list-style-type: none; padding: 0; }
-        .dynamic-list li { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; }
-        .item-title { flex-grow: 1; margin: 0 10px; }
+        .dynamic-list li { display: flex; flex-direction: column; align-items: flex-start; padding: 10px; border-bottom: 1px solid #eee; }
+        .item-info { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        .item-title { flex-grow: 1; margin: 0 10px; font-weight: bold; }
+        .item-meta { font-size: 12px; color: #888; margin-top: 5px; width: 100%; }
         .item-buttons button { padding: 5px 10px; font-size: 14px; margin-left: 5px; color: white; }
         .restore-btn { background-color: #28a745; }
         .perm-delete-btn { background-color: #dc3545; }
@@ -49,7 +73,13 @@
 <body>
 
     <div class="container">
-        <h1>نموذج بنود الصيانة</h1>
+        <div id="dateDisplay" class="date-display"></div>
+        <h2 class="subtitle">إدارة الشؤون الهندسية - قسم الصيانة</h2>
+        <h1>برنامج إنشاء بنود الصيانة</h1>
+        <div class="counters-container">
+            <div id="completedReportsCounter" class="counter-box" onclick="openCompletedReportsModal()"></div>
+            <div id="inspectionReportsCounter" class="counter-box" onclick="openInspectionReportsListModal()"></div>
+        </div>
         <div id="itemsGrid" class="grid-container"></div>
         <div class="button-container">
             <button onclick="openNewItemModal()" class="action-button add-button">(+) إضافة بند</button>
@@ -60,6 +90,9 @@
             <button onclick="exportData()" class="action-button data-export-button">تصدير البيانات</button>
             <button onclick="importData()" class="action-button data-import-button">استيراد البيانات</button>
         </div>
+        <footer>
+            <p>تم انشاء هذا البرنامج بواسطة المهندس نصار وائل نصار عن طريق استخدام الذكاء الاصطناعي.</p>
+        </footer>
     </div>
 
     <div id="editModal" class="modal-overlay">
@@ -102,19 +135,31 @@
             <textarea id="inspectionNotes"></textarea>
             <div class="modal-buttons">
                 <button onclick="saveAndExportInspectionReport()" class="save-btn">حفظ واستخراج</button>
-                <button onclick="closeInspectionReportModal()" class="cancel-btn">إغلاق</button>
+                <button onclick="closeInspectionReportModal()" class="cancel-btn">إلغاء</button>
             </div>
         </div>
     </div>
     
-    <input type="file" id="importFileInput" accept=".json" style="display: none;">
+    <div id="completedReportsModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>تقارير البنود المنجزة</h2>
+            <ul id="completedReportsList" class="dynamic-list"></ul>
+            <div class="modal-buttons" style="justify-content: flex-end;"><button onclick="closeCompletedReportsModal()" class="cancel-btn">إغلاق</button></div>
+        </div>
+    </div>
+
+    <div id="inspectionReportsListModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>تقارير الكشف المنجزة</h2>
+            <ul id="inspectionReportsList" class="dynamic-list"></ul>
+            <div class="modal-buttons" style="justify-content: flex-end;"><button onclick="closeInspectionReportsListModal()" class="cancel-btn">إغلاق</button></div>
+        </div>
+    </div>
     
-    <footer>
-        <p>تم انشاء هذا البرنامج بواسطة المهندس نصار وائل نصار عن طريق استخدام الذكاء الاصطناعي.</p>
-    </footer>
+    <input type="file" id="importFileInput" accept=".json" style="display: none;">
 
     <script>
-        let itemsData = [], trashData = [], adHocItems = [], inspectionReports = [];
+        let itemsData = [], trashData = [], adHocItems = [], inspectionReports = [], completedItemsReports = [];
         const userSelections = {};
         const initialData = [
             {"مسلسل":1.0,"CODE":"E-A-01","Title":"مفتاح انارة مفرد","LongDescription":"","Unit":"عدد", "ImageUrl": ""},
@@ -126,6 +171,7 @@
             itemsData = JSON.parse(localStorage.getItem('maintenanceItems')) || initialData;
             trashData = JSON.parse(localStorage.getItem('maintenanceItems_trash')) || [];
             inspectionReports = JSON.parse(localStorage.getItem('maintenanceInspectionReports')) || [];
+            completedItemsReports = JSON.parse(localStorage.getItem('maintenanceCompletedItemsReports')) || [];
             adHocItems = JSON.parse(sessionStorage.getItem('maintenanceAdHocItems')) || [];
             Object.assign(userSelections, JSON.parse(sessionStorage.getItem('maintenanceSelections')) || {});
         }
@@ -134,6 +180,7 @@
             localStorage.setItem('maintenanceItems', JSON.stringify(itemsData));
             localStorage.setItem('maintenanceItems_trash', JSON.stringify(trashData));
             localStorage.setItem('maintenanceInspectionReports', JSON.stringify(inspectionReports));
+            localStorage.setItem('maintenanceCompletedItemsReports', JSON.stringify(completedItemsReports));
             sessionStorage.setItem('maintenanceAdHocItems', JSON.stringify(adHocItems));
             sessionStorage.setItem('maintenanceSelections', JSON.stringify(userSelections));
         }
@@ -145,6 +192,8 @@
             itemsData.forEach(item => itemsGrid.appendChild(createGridItem(item)));
             itemsGrid.appendChild(createAdHocItemBox());
             updateVisualSelections();
+            updateCompletedCounter();
+            updateInspectionCounter();
         }
 
         function createGridItem(item) {
@@ -211,11 +260,7 @@
         }
         
         function exportData() {
-            const dataBundle = {
-                items: itemsData,
-                trash: trashData,
-                reports: inspectionReports
-            };
+            const dataBundle = { items: itemsData, trash: trashData, reports: inspectionReports, completed: completedItemsReports };
             const dataString = JSON.stringify(dataBundle, null, 2);
             const blob = new Blob([dataString], { type: 'application/json' });
             const link = document.createElement("a");
@@ -234,32 +279,24 @@
         function handleFileImport(event) {
             const file = event.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
-                    const importedData = JSON.parse(e.target.result);
-                    if (importedData.items && importedData.trash && importedData.reports) {
-                        itemsData = importedData.items || initialData;
-                        trashData = importedData.trash || [];
-                        inspectionReports = importedData.reports || [];
-                        
+                    const data = JSON.parse(e.target.result);
+                    if (data.items && data.trash && data.reports && data.completed) {
+                        itemsData = data.items || initialData;
+                        trashData = data.trash || [];
+                        inspectionReports = data.reports || [];
+                        completedItemsReports = data.completed || [];
                         saveAllData();
                         renderItems();
                         alert('تم استيراد البيانات بنجاح!');
-                    } else {
-                        alert('خطأ: صيغة ملف البيانات غير صحيحة.');
-                    }
-                } catch (error) {
-                    alert('خطأ: الملف غير صالح أو تالف. لم يتم استيراد البيانات.');
-                }
+                    } else { alert('خطأ: صيغة ملف البيانات غير صحيحة.'); }
+                } catch (error) { alert('خطأ: الملف غير صالح أو تالف.'); }
             };
             reader.readAsText(file);
-            // Reset file input to allow re-importing the same file if needed
             event.target.value = '';
         }
-
-        // --- ALL OTHER FUNCTIONS ---
         
         function openNewItemModal() {
             document.getElementById('modalTitle').innerText = "إضافة بند جديد";
@@ -289,20 +326,14 @@
         function addNewItem() {
             const allIds = [...itemsData, ...trashData].map(i => i['مسلسل']);
             const maxId = Math.max(0, ...allIds);
-            itemsData.push({
-                'مسلسل': maxId + 1, Title: document.getElementById('editTitle').value, LongDescription: document.getElementById('editLongDesc').value,
-                ImageUrl: document.getElementById('editImageUrl').value, CODE: document.getElementById('editCode').value, Unit: document.getElementById('editUnit').value,
-            });
+            itemsData.push({ 'مسلسل': maxId + 1, Title: document.getElementById('editTitle').value, LongDescription: document.getElementById('editLongDesc').value, ImageUrl: document.getElementById('editImageUrl').value, CODE: document.getElementById('editCode').value, Unit: document.getElementById('editUnit').value });
             saveAllData(); renderItems(); closeEditModal();
         }
 
         function saveEditedItem(itemId) {
             const idx = itemsData.findIndex(i => i['مسلسل'] === itemId);
             if (idx > -1) {
-                Object.assign(itemsData[idx], {
-                    Title: document.getElementById('editTitle').value, LongDescription: document.getElementById('editLongDesc').value,
-                    ImageUrl: document.getElementById('editImageUrl').value, CODE: document.getElementById('editCode').value, Unit: document.getElementById('editUnit').value,
-                });
+                Object.assign(itemsData[idx], { Title: document.getElementById('editTitle').value, LongDescription: document.getElementById('editLongDesc').value, ImageUrl: document.getElementById('editImageUrl').value, CODE: document.getElementById('editCode').value, Unit: document.getElementById('editUnit').value });
                 saveAllData(); renderItems(); closeEditModal();
             }
         }
@@ -333,10 +364,7 @@
         
         function restoreItem(itemId) {
             const idx = trashData.findIndex(i => i['مسلسل'] === itemId);
-            if (idx > -1) {
-                itemsData.push(trashData.splice(idx, 1)[0]);
-                saveAllData(); renderItems(); closeTrashModal();
-            }
+            if (idx > -1) { itemsData.push(trashData.splice(idx, 1)[0]); saveAllData(); renderItems(); closeTrashModal(); }
         }
         
         function deletePermanently(itemId) {
@@ -392,6 +420,7 @@
             const report = { id: Date.now(), mosqueNum, area, notes, date: new Date().toISOString() };
             inspectionReports.push(report);
             saveAllData();
+            updateInspectionCounter();
             const textContent = `تقرير كشف مسجد\n====================\nرقم المسجد: ${report.mosqueNum}\nالمنطقة: ${report.area}\nتاريخ التقرير: ${new Date(report.date).toLocaleDateString('ar-EG')}\n====================\n\nالملاحظات:\n--------------------\n${report.notes}`;
             const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8;' });
             const link = document.createElement("a");
@@ -418,21 +447,30 @@
             const selectedStandard = Object.keys(userSelections).length > 0;
             const selectedAdHoc = adHocItems.some(i => i.isSelected);
             if (!selectedStandard && !selectedAdHoc) { alert("لم يتم اختيار أي بنود."); return; }
-            let fileName = prompt("الرجاء إدخال اسم لملف تقرير البنود:", "تقرير_بنود_الصيانة");
-            if (!fileName) fileName = "تقرير_بنود_الصيانة";
+            const mosqueName = prompt("الرجاء إدخال اسم المسجد (سيتم استخدامه كاسم للملف):");
+            if (!mosqueName) return;
+            const engineerName = prompt("الرجاء إدخال اسم المهندس المصمم:");
+            if (!engineerName) return;
+            const fileName = mosqueName;
+            const reportSnapshot = {
+                id: Date.now(), fileName, mosqueName, engineerName, date: new Date().toISOString(),
+                userSelections: JSON.parse(JSON.stringify(userSelections)),
+                adHocItems: JSON.parse(JSON.stringify(adHocItems.filter(i => i.isSelected))),
+                itemsDataSnapshot: JSON.parse(JSON.stringify(itemsData))
+            };
+            completedItemsReports.push(reportSnapshot);
             let csvContent = "مسلسل,CODE,العنوان,الوصف التفصيلي,Unit,QTY,الملاحظات\n";
             const escapeCSV = (str) => `"${String(str || '').replace(/"/g, '""')}"`;
-            itemsData.sort((a,b) => a['مسلسل'] - b['مسلسل']).forEach(item => {
-                const selection = userSelections[item['مسلسل']];
+            reportSnapshot.itemsDataSnapshot.sort((a,b) => a['مسلسل'] - b['مسلسل']).forEach(item => {
+                const selection = reportSnapshot.userSelections[item['مسلسل']];
                 if (selection) {
                     const row = [item['مسلسل'], item.CODE, item.Title, formatLongTextForExcel(item.LongDescription), item.Unit, selection.quantity, selection.notes].map(escapeCSV).join(',');
                     csvContent += row + "\n";
                 }
             });
-            const includedAdHoc = adHocItems.filter(i => i.isSelected);
-            if (includedAdHoc.length > 0) {
+            if (reportSnapshot.adHocItems.length > 0) {
                 csvContent += "\n--- إضافات حرة ---\n";
-                includedAdHoc.forEach(item => {
+                reportSnapshot.adHocItems.forEach(item => {
                     const row = ["-", "AD-HOC", item.Title, "", "", item.quantity, item.notes].map(escapeCSV).join(',');
                     csvContent += row + "\n";
                 });
@@ -444,17 +482,122 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+            Object.keys(userSelections).forEach(key => delete userSelections[key]);
+            adHocItems = [];
+            saveAllData();
+            renderItems();
+            alert("تم إنشاء التقرير بنجاح، وتمت أرشفته في سجل التقارير المنجزة.");
+        }
+
+        function updateCompletedCounter() {
+            document.getElementById('completedReportsCounter').innerText = `عدد تقارير البنود المنجزة: ${completedItemsReports.length}`;
         }
         
-        // --- INITIALIZATION ---
+        function updateInspectionCounter() {
+            document.getElementById('inspectionReportsCounter').innerText = `عدد تقارير الكشف المنجزة: ${inspectionReports.length}`;
+        }
+
+        function openCompletedReportsModal() {
+            const list = document.getElementById('completedReportsList');
+            list.innerHTML = completedItemsReports.length === 0 ? '<li>لا توجد تقارير منجزة بعد.</li>' : '';
+            completedItemsReports.sort((a, b) => new Date(b.date) - new Date(a.date));
+            completedItemsReports.forEach(report => {
+                const li = document.createElement('li');
+                const reportDate = new Date(report.date).toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' });
+                li.innerHTML = `<div class="item-info"><span class="item-title">${report.fileName}.csv</span><div class="item-buttons"><button class="restore-btn" onclick="redownloadReport(${report.id})">تحميل</button><button class="perm-delete-btn" onclick="deleteCompletedReport(${report.id})">حذف</button></div></div><div class="item-meta"><span>تاريخ الإنشاء: ${reportDate}</span> | <span>المهندس: ${report.engineerName || 'غير محدد'}</span></div>`;
+                list.appendChild(li);
+            });
+            document.getElementById('completedReportsModal').style.display = 'flex';
+        }
+
+        function closeCompletedReportsModal() { document.getElementById('completedReportsModal').style.display = 'none'; }
+
+        function redownloadReport(reportId) {
+            const report = completedItemsReports.find(r => r.id === reportId);
+            if (!report) { alert('لم يتم العثور على التقرير.'); return; }
+            let csvContent = "مسلسل,CODE,العنوان,الوصف التفصيلي,Unit,QTY,الملاحظات\n";
+            const escapeCSV = (str) => `"${String(str || '').replace(/"/g, '""')}"`;
+            report.itemsDataSnapshot.sort((a,b) => a['مسلسل'] - b['مسلسل']).forEach(item => {
+                const selection = report.userSelections[item['مسلسل']];
+                if (selection) {
+                    const row = [item['مسلسل'], item.CODE, item.Title, formatLongTextForExcel(item.LongDescription), item.Unit, selection.quantity, selection.notes].map(escapeCSV).join(',');
+                    csvContent += row + "\n";
+                }
+            });
+            if (report.adHocItems && report.adHocItems.length > 0) {
+                csvContent += "\n--- إضافات حرة ---\n";
+                report.adHocItems.forEach(item => { const row = ["-", "AD-HOC", item.Title, "", "", item.quantity, item.notes].map(escapeCSV).join(','); csvContent += row + "\n"; });
+            }
+            const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.setAttribute("href", URL.createObjectURL(blob));
+            link.setAttribute("download", `${report.fileName}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function deleteCompletedReport(reportId) {
+            if (confirm('هل أنت متأكد من حذف سجل هذا التقرير؟ (هذا الإجراء نهائي).')) {
+                const idx = completedItemsReports.findIndex(r => r.id === reportId);
+                if (idx > -1) { completedItemsReports.splice(idx, 1); saveAllData(); updateCompletedCounter(); openCompletedReportsModal(); }
+            }
+        }
+
+        function openInspectionReportsListModal() {
+            const list = document.getElementById('inspectionReportsList');
+            list.innerHTML = inspectionReports.length === 0 ? '<li>لا توجد تقارير كشف منجزة بعد.</li>' : '';
+            inspectionReports.sort((a, b) => new Date(b.date) - new Date(a.date));
+            inspectionReports.forEach(report => {
+                const li = document.createElement('li');
+                const reportDate = new Date(report.date).toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' });
+                li.innerHTML = `<div class="item-info"><span class="item-title">تقرير مسجد: ${report.mosqueNum || 'غير محدد'}</span><div class="item-buttons"><button class="restore-btn" onclick="redownloadInspectionReport(${report.id})">تحميل</button><button class="perm-delete-btn" onclick="deleteInspectionReport(${report.id})">حذف</button></div></div><div class="item-meta"><span>تاريخ الإنشاء: ${reportDate}</span> | <span>المنطقة: ${report.area || 'غير محدد'}</span></div>`;
+                list.appendChild(li);
+            });
+            document.getElementById('inspectionReportsListModal').style.display = 'flex';
+        }
+
+        function closeInspectionReportsListModal() { document.getElementById('inspectionReportsListModal').style.display = 'none'; }
+        
+        function redownloadInspectionReport(reportId) {
+            const report = inspectionReports.find(r => r.id === reportId);
+            if (!report) { alert('لم يتم العثور على التقرير.'); return; }
+            const textContent = `تقرير كشف مسجد\n====================\nرقم المسجد: ${report.mosqueNum}\nالمنطقة: ${report.area}\nتاريخ التقرير: ${new Date(report.date).toLocaleDateString('ar-EG')}\n====================\n\nالملاحظات:\n--------------------\n${report.notes}`;
+            const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `تقرير كشف ${report.mosqueNum || 'جديد'}.txt`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function deleteInspectionReport(reportId) {
+            if (confirm('هل أنت متأكد من حذف سجل هذا التقرير؟ (هذا الإجراء نهائي).')) {
+                const idx = inspectionReports.findIndex(r => r.id === reportId);
+                if (idx > -1) { inspectionReports.splice(idx, 1); saveAllData(); updateInspectionCounter(); openInspectionReportsListModal(); }
+            }
+        }
+        
+        function updateDateDisplay() {
+            const dateDiv = document.getElementById('dateDisplay');
+            const now = new Date();
+            const dayName = now.toLocaleDateString('ar-EG', { weekday: 'long' });
+            const day = now.getDate();
+            const monthName = now.toLocaleDateString('ar-EG', { month: 'long' });
+            const year = now.getFullYear();
+            dateDiv.innerText = `تاريخ اليوم: ${day} ${monthName}، ${year} - اليوم: ${dayName}`;
+        }
+        
         window.onload = () => {
             loadAllData();
             renderItems();
+            updateDateDisplay();
             document.getElementById('importFileInput').addEventListener('change', handleFileImport);
+            document.querySelectorAll('.modal-overlay').forEach(modal => {
+                modal.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
+            });
         };
-        document.querySelectorAll('.modal-overlay').forEach(modal => {
-            modal.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
-        });
     </script>
 </body>
 </html>
