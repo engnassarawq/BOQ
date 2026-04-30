@@ -41,10 +41,11 @@
         }
         .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; margin-top: 30px; }
         .grid-item { position: relative; background-color: #fff; border: 2px solid #ddd; border-radius: 8px; text-align: center; transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; justify-content: space-between; height: 220px; padding: 10px; }
-        .grid-item:hover { transform: translateY(-5px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .grid-item.selected { cursor: pointer; }
+        .grid-item:not(.adhoc-item):hover { transform: translateY(-5px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .grid-item.selected { border-color: #4CAF50; background-color: #f1fff2; }
-        .grid-item img { max-width: 90px; height: 90px; margin: 10px auto; display: block; border-radius: 5px; object-fit: cover; cursor: pointer; }
-        .grid-item p { font-size: 14px; margin: 0; flex-grow: 1; cursor: pointer; }
+        .grid-item img { max-width: 90px; height: 90px; margin: 10px auto; display: block; border-radius: 5px; object-fit: cover; }
+        .grid-item p { font-size: 14px; margin: 0; flex-grow: 1; }
         .edit-button { position: absolute; top: 5px; left: 5px; width: 25px; height: 25px; background-color: rgba(0,0,0,0.1); border: none; border-radius: 50%; cursor: pointer; font-size: 16px; line-height: 25px; text-align: center; z-index: 10; }
         .selection-checkbox { position: absolute; top: 5px; right: 5px; width: 25px; height: 25px; cursor: pointer; }
         .button-container { text-align: center; margin-top: 40px; margin-bottom: 40px; display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; }
@@ -203,13 +204,12 @@
             const searchTerm = filterTerm.toLowerCase().trim();
             const itemsGrid = document.getElementById('itemsGrid');
             itemsGrid.innerHTML = '';
-            
             const filteredItems = itemsData.filter(item => item.Title.toLowerCase().includes(searchTerm));
-            
             filteredItems.sort((a, b) => a['مسلسل'] - b['مسلسل']);
             filteredItems.forEach(item => itemsGrid.appendChild(createGridItem(item)));
-            
-            itemsGrid.appendChild(createAdHocItemBox());
+            if (!searchTerm) {
+                itemsGrid.appendChild(createAdHocItemBox());
+            }
             updateVisualSelections();
             updateCompletedCounter();
             updateInspectionCounter();
@@ -217,25 +217,39 @@
 
         function createGridItem(item) {
             const gridItem = document.createElement('div');
-            gridItem.className = 'grid-item'; gridItem.id = `item-${item['مسلسل']}`;
+            gridItem.className = 'grid-item';
+            gridItem.id = `item-${item['مسلسل']}`;
+            gridItem.onclick = (e) => {
+                if (e.target.classList.contains('selection-checkbox') || e.target.classList.contains('edit-button')) {
+                    return;
+                }
+                editSelection(item['مسلسل']);
+            };
             const editBtn = document.createElement('button');
-            editBtn.className = 'edit-button'; editBtn.innerHTML = '&#9881;';
+            editBtn.className = 'edit-button';
+            editBtn.innerHTML = '&#9881;';
             editBtn.onclick = (e) => { e.stopPropagation(); openEditModal(item['مسلسل']); };
             const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox'; checkbox.className = 'selection-checkbox'; checkbox.id = `check-${item['مسلسل']}`;
+            checkbox.type = 'checkbox';
+            checkbox.className = 'selection-checkbox';
+            checkbox.id = `check-${item['مسلسل']}`;
             checkbox.onchange = () => toggleItemSelection(item['مسلسل']);
             const img = document.createElement('img');
             img.src = item.ImageUrl || `https://via.placeholder.com/150/808080/FFFFFF?text=Item`;
             img.alt = item.Title;
             const title = document.createElement('p');
             title.textContent = item.Title;
-            gridItem.appendChild(editBtn); gridItem.appendChild(checkbox); gridItem.appendChild(img); gridItem.appendChild(title);
+            gridItem.appendChild(editBtn);
+            gridItem.appendChild(checkbox);
+            gridItem.appendChild(img);
+            gridItem.appendChild(title);
             return gridItem;
         }
 
         function createAdHocItemBox() {
             const gridItem = document.createElement('div');
-            gridItem.className = 'grid-item'; gridItem.style.cursor = 'pointer';
+            gridItem.className = 'grid-item adhoc-item';
+            gridItem.style.cursor = 'pointer';
             gridItem.onclick = addAdHocItem;
             gridItem.innerHTML = `<img src="https://via.placeholder.com/150/ffc107/000000?text=%2B" alt="إضافات حرة"><p style="font-weight: bold;">إضافة حرة</p>`;
             return gridItem;
@@ -256,13 +270,41 @@
         function toggleItemSelection(itemId) {
             const checkbox = document.getElementById(`check-${itemId}`);
             if (checkbox.checked) {
-                const item = itemsData.find(i => i['مسلسل'] === itemId);
-                const currentQty = userSelections[itemId] ? userSelections[itemId].quantity : 1;
-                const notes = prompt(`أدخل الملاحظات (إن وجدت):`, userSelections[itemId] ? userSelections[itemId].notes : '');
-                const quantity = prompt(`أدخل الكمية للبند:\n"${item.Title}"`, currentQty);
-                if (quantity === null || isNaN(quantity) || parseInt(quantity, 10) <= 0) { checkbox.checked = false; return; }
-                userSelections[itemId] = { quantity: parseInt(quantity, 10), notes: notes || '' };
-            } else { delete userSelections[itemId]; }
+                editSelection(itemId, true);
+            } else {
+                if (confirm('هل أنت متأكد من إلغاء اختيار هذا البند؟ سيتم حذف الكميات والملاحظات المدخلة.')) {
+                    delete userSelections[itemId];
+                } else {
+                    checkbox.checked = true;
+                }
+            }
+            saveAllData();
+            updateVisualSelections();
+        }
+
+        function editSelection(itemId, isNewSelection = false) {
+            const item = itemsData.find(i => i['مسلسل'] === itemId);
+            if (!item) return;
+            if (!isNewSelection && !userSelections[itemId]) {
+                return;
+            }
+            const currentQty = userSelections[itemId] ? userSelections[itemId].quantity : 1;
+            const currentNotes = userSelections[itemId] ? userSelections[itemId].notes : '';
+            const newQuantity = prompt(`تعديل الكمية للبند:\n"${item.Title}"`, currentQty);
+            if (newQuantity === null) {
+                if (isNewSelection) {
+                    document.getElementById(`check-${itemId}`).checked = false;
+                }
+                return;
+            }
+            const quantityNum = parseInt(newQuantity, 10);
+            if (isNaN(quantityNum) || quantityNum <= 0) {
+                delete userSelections[itemId];
+                alert('تم إدخال كمية غير صالحة. تم إلغاء اختيار البند.');
+            } else {
+                const newNotes = prompt(`تعديل الملاحظات (إن وجدت):`, currentNotes);
+                userSelections[itemId] = { quantity: quantityNum, notes: newNotes || '' };
+            }
             saveAllData();
             updateVisualSelections();
         }
@@ -609,7 +651,7 @@
         }
         
         function filterItems() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+            const searchTerm = document.getElementById('searchInput').value;
             renderItems(searchTerm);
         }
         
@@ -620,7 +662,7 @@
             document.getElementById('importFileInput').addEventListener('change', handleFileImport);
             document.getElementById('searchInput').addEventListener('input', filterItems);
             document.querySelectorAll('.modal-overlay').forEach(modal => {
-                modal.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
+                modal.addEventListener('click', (e) => { if (e.target === modal) e.target.style.display = 'none'; });
             });
         };
     </script>
