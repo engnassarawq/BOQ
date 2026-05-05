@@ -106,7 +106,7 @@
             <button onclick="importData()" class="action-button data-import-button">استيراد البيانات</button>
         </div>
         <footer>
-            <p>تم انشاء هذا البرنامج بواسطة المهندس نصار وائل نصار عن طريق استخدام الذكاء الاصطناعي.</p>
+            <p>اداة مهندس المصمم.</p>
         </footer>
     </div>
 
@@ -176,78 +176,495 @@
     <script>
         let itemsData = [], trashData = [], adHocItems = [], inspectionReports = [], completedItemsReports = [];
         const userSelections = {};
-        
         const initialData = [
-            { "مسلسل": 1, "CODE": "E-A-01", "Title": "توريد وتركيب خزانة خشبية", "Unit": "مقطوعية", "ImageUrl": "", "LongDescription": "توريد وتركيب خزانة خشبية (( مشربية ))لمجمع الكهرباء" },
-            { "مسلسل": 2, "CODE": "E-A-02", "Title": "توريد وتركيب خزانة المنيوم", "Unit": "مقطوعية", "ImageUrl": "", "LongDescription": "توريد وتركيب خزانة المنيوم مع عمل التهوية المناسبة لمجمع الكهرباء" },
-            { "مسلسل": 3, "CODE": "E-A-03", "Title": "توريد وتركيب إنارة IP65", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب إنارة IP65 4FEET W.P LED TYPE أو إنارة IP 65 HUNTER DOGLAS W.P LED TYPE حسب نوعية السقف مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات" },
-            { "مسلسل": 4, "CODE": "E-A-04", "Title": "توريد وتركيب وحدات إضاءة جدارية", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب وحدات إضاءة جدارية أو معلقة بواسطة سلاسل حسب موقع التركيب، ذات طابع تراثي، ومزودة بلمبات LED بقدرة 9 واط (9W)، وبدرجة حماية IP65 ضد العوامل الجوية، مع تنفيذ كافة التمديدات الكهربائية اللازمة بشكل مخفي ومنسق مع عناصر الموقع وفقًا للمواصفات الفنية المعتمدة. يتم توصيل وتشغيل وحدات الإضاءة بواسطة كونتاكتر (Contactor) متصل مع تايمر رقمي متعدد الضبط لسبعة أيام (7-Day Digital Timer) مع مفتاح تشغيل يدوي (Manual Switch) لتمكين التشغيل اليدوي عند الحاجة. يشمل البند تأمين جميع الكابلات، والإكسسوارات، والحوامل، والتوصيلات، والاختبارات الكهربائية اللازمة لضمان التشغيل الآمن والسليم ." },
-            { "مسلسل": 5, "CODE": "E-A-05", "Title": "توريد وتركيب وحدات إضاءة COB", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب وحدات إضاءة جدارية من نوع COB LED أو Power LED بقدرة تتراوح بين 25 إلى 40 واط حسب الطلب واعتماد المهندس المشرف، وبدرجة حماية لا تقل عن IP65، ويكون الغطاء في جميع الحالات من Polycarbonate أو Clear Glass BK7. يشمل البند تنفيذ جميع التمديدات الكهربائية اللازمة بشكل مخفي وما يلزم للتشغيل وفقًا للمواصفات الفنية المعتمدة. يتم توصيل وتشغيل وحدات الإضاءة بواسطة كونتاكتر (Contactor) متصل مع تايمر رقمي متعدد الضبط لسبعة أيام (7-Day Digital Timer) مزود بـ مفتاح تشغيل يدوي (Manual Switch) لتمكين التحكم اليدوي عند الحاجة. يتم تنفيذ جميع الأعمال طبقًا للمواصفات الفنية ." },
-            { "مسلسل": 6, "CODE": "E-A-06", "Title": "توريد وتركيب إنارة decorative", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب إنارة decorative type مطلية بالذهب مع لمبة LED 9-12WATT مع ضمان عشر سنوات بعدم تغير اللون الذهبي مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات" },
-            { "مسلسل": 7, "CODE": "E-A-07", "Title": "توريد وتركيب إنارة decorative بسلسلة", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب إنارة decorative type مطلية بالذهب مع لمبة LED 9-12WATT مع ضمان عشر سنوات بعدم تغير اللون الذهبي بواسطة سلسلة مطلية بالذهب مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات" },
-            { "مسلسل": 8, "CODE": "E-A-08", "Title": "توريد وتركيب لمبات للثريا", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب لمبات للثريا 4Watt LED lamp with aluminum body and UV protected diffuser.وما يلزم للتشغيل حسب المواصفات" },
-            { "مسلسل": 9, "CODE": "E-A-09", "Title": "توريد وتركيب LED PANEL 30x120", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب انارة داخلية نوعية LED PANEL بمقاسات 30سم * 120 سم بقدرة تتراوح ما بين 40-50 وات مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات" },
-            { "مسلسل": 10, "CODE": "E-A-10", "Title": "توريد وتركيب LED PANEL 60x60", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب انارة داخلية نوعية LED PANEL بمقاسات 60سم *60 سم بقدرة تتراوح ما بين 40-50 وات مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات" },
-            { "مسلسل": 11, "CODE": "E-A-11", "Title": "إنارة جانبية Decorative Luminaires", "Unit": "عدد", "ImageUrl": "", "LongDescription": "إنارة جانبية : (Decorative Luminaires) توريد وتركيب وحدات مع لمبات 15 WATT AMENITY LED BULKHEAD او وحدات 9WATT LED WALL TYPE مع امكانية التحكم بزاوية التركيب بين 10 الى 120 درجةداخل المحراب مع جميع التمديدات مخفية وما يلزم للتشغيل حسب المواصفات" },
-            { "مسلسل": 12, "CODE": "E-A-12", "Title": "توريد وتركيب LED PANEL 60x120", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب انارة داخلية نوعية LED PANEL بمقاسات 60سم *120سم بقدرة 80 وات مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات" },
-            { "مسلسل": 13, "CODE": "E-A-13", "Title": "توريد وتركيب LED PANEL SLIM", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب انارة داخلية نوعية LED PANEL SLIM TYPE بمقاسات 60سم *60 سم بقدرة تتراوح ما بين 40-50 وات مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات" },
-            { "مسلسل": 14, "CODE": "E-A-14", "Title": "توريد وتركيب ثريا قطر 1.5م", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب ثريا ذات طابع اسلامي مصنوعة من النحاس ومطلية بالذهب الخالص عيار 24 بضمان 10 سنوات بعدم تغيير اللون الذهبي الخالص قطر 1.5 متر للقبة مع كامل اللمبات نوعية LED مع كامل التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات" },
-            { "مسلسل": 15, "CODE": "E-A-15", "Title": "توريد وتركيب ثريا قطر 2م", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب ثريا ذات طابع اسلامي مصنوعة من النحاس ومطلية بالذهب الخالص عيار 24 بضمان 10 سنوات بعدم تغيير اللون الذهبي الخالص قطر2 متر للقبة مع كامل اللمبات نوعية LED مع كامل التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات" },
-            { "مسلسل": 16, "CODE": "E-A-16", "Title": "توريد وتركيب ثريا قطر 4م", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب ثريا ذات طابع اسلامي مصنوعة من النحاس ومطلية بالذهب الخالص عيار 24 بضمان 10 سنوات بعدم تغيير اللون الذهبي الخالص قطر 4 متر للقبة مع كامل اللمبات نوعية LED مع كامل التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات" },
-            { "مسلسل": 17, "CODE": "E-A-17", "Title": "توريد وتركيب ثريا قطر 5م", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب ثريا ذات طابع اسلامي مصنوعة من النحاس ومطلية بالذهب الخالص عيار 24 بضمان 10 سنوات بعدم تغيير اللون الذهبي الخالص قطر5 متر للقبة مع كامل اللمبات نوعية LED مع كامل التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات" },
-            { "مسلسل": 18, "CODE": "E-A-18", "Title": "توريد وتركيب إنارة Spot Light", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب إنارة (Spot Light) نوعية 5-15 وات CREE COB WITH DRIVER مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات ." },
-            { "مسلسل": 19, "CODE": "E-A-19", "Title": "توريد وتركيب انارة Down Light", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب انارة ( Down Light ) 20-26 WATT COB LED او CREE POWER LED مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات" },
-            { "مسلسل": 20, "CODE": "E-A-20", "Title": "توريد وتركيب انارة داخلية 2x18W", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب انارة داخلية WITH EXTERNAL DRIVER TYPE 2*18 WATT LED مع عاكس المنيوم مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات ." },
-            { "مسلسل": 21, "CODE": "E-B-01", "Title": "توريد وتركيب جرس كهربائي", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب جرس كهربائي low volt مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات" },
-            { "مسلسل": 22, "CODE": "E-B-02", "Title": "توريد وتركيب S SOCKET 13 AMP", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب S SOCKET 13 AMPمع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات" },
-            { "مسلسل": 23, "CODE": "E-C-01", "Title": "توصيل كهرباء مكيف Split Unit", "Unit": "مقطوعية", "ImageUrl": "", "LongDescription": "توصيل كهرباء مكيف من النوع المجزأ split unit مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات ." },
-            { "مسلسل": 24, "CODE": "E-C-02", "Title": "توصيل كهرباء جهاز تبريد المياه", "Unit": "مقطوعية", "ImageUrl": "", "LongDescription": "توصيل كهرباء جهاز تبريد المياه بقدرة تبريد 24000BTU/H مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات ." },
-            { "مسلسل": 25, "CODE": "E-C-03", "Title": "توصيل كهرباء مكيف Free Standing", "Unit": "مقطوعية", "ImageUrl": "", "LongDescription": "توصيل كهرباء مكيف من النوع free standing ب بواسطة كيبل 10mm2 وتركيب isolater 32amp W.P steel type يمرر على cable tray ومغطى ب G.I TRUNK مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات" },
-            { "مسلسل": 26, "CODE": "E-C-04", "Title": "عمل جميع ما يلزم لتوصيل الكهرباء", "Unit": "مقطوعية", "ImageUrl": "", "LongDescription": "عمل جميع ما يلزم لتوصيل الكهرباء بعمل توصيلات جديدة تشمل Cable Tray وترنك (Trunking) لاستبدال التمديدات الحالية، باستخدام كابل مناسب حسب القدرة المطلوبة، مع تركيب Isolators من نوع W.P Steel Type، بحيث يتم تمرير الكابل على Cable Tray مرفوع عن السطح بمقدار 30 سم ومغطى بـ G.I Trunk، مع تنفيذ جميع التمديدات الكهربائية اللازمة بشكل مخفي حسب المواصفات الفنية وأصول الصناعة. يشمل البند أيضًا اختبار صلاحية الكوابل القديمة وإعادة استخدامها في حال كانت بحالة جيدة، وفي هذه الحالة يتم خصم بند توريد الكابل من القيمة الإجمالية ." },
-            { "مسلسل": 27, "CODE": "E-D-01", "Title": "توريد وتركيب D.B 3ph/100amp/8way", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب 3ph/ 100amp / 8 way D.B عن طريق كيبل ارضي حسب المواصفات داخل بايبات 4 انش" },
-            { "مسلسل": 28, "CODE": "E-D-02", "Title": "توريد وتركيب D.B 3ph/100amp/8way بدل القديم", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب 3ph/ 100amp / 8 way D.B بدل القديم" },
-            { "مسلسل": 29, "CODE": "E-D-03", "Title": "توريد وتركيب D.B 1ph/60amp/10way", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب 1ph/ 60amp / 10 way D.B" },
-            { "مسلسل": 30, "CODE": "E-D-04", "Title": "توريد وتركيب PANEL BOARD 3ph/100amp/2way", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب 3ph/100amp / 2 way PANEL BOARD لتغذية لوحات التوزيع القديمة والجديدة مع كامل البريكرات الرئيسة والاحتياطية ." },
-            { "مسلسل": 31, "CODE": "E-D-05", "Title": "توريد وتركيب PANEL BOARD 3ph/100amp/4way", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب 3ph/100amp / 4 way PANEL BOARD لتغذية لوحات التوزيع القديمة والجديدة مع كامل البريكرات الرئيسة والاحتياطية ." },
-            { "مسلسل": 32, "CODE": "E-D-06", "Title": "توريد وتركيب PANEL BOARD 3ph/200amp/4way", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب 3ph/200amp / 4 way PANEL BOARD لتغذية لوحات التوزيع القديمة والجديدة مع كامل البريكرات الرئيسة والاحتياطية ." },
-            { "مسلسل": 33, "CODE": "E-D-07", "Title": "توريد وتركيب PANEL BOARD 3ph/100amp/6way", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب 3ph/100amp / 6way PANEL BOARD لتغذية لوحات التوزيع القديمة والجديدة مع كامل البريكرات الرئيسة والاحتياطية ." },
-            { "مسلسل": 34, "CODE": "E-D-08", "Title": "توريد وتركيب PANEL BOARD 3ph/200amp/6way", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب 3ph/200amp /6 way PANEL BOARD لتغذية لوحات التوزيع القديمة والجديدة مع كامل البريكرات الرئيسة والاحتياطية ." },
-            { "مسلسل": 35, "CODE": "E-D-09", "Title": "توريد وتركيب PANEL BOARD 3ph/400amp/6way", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب 3ph/400amp /6 way PANEL BOARD لتغذية لوحات التوزيع القديمة والجديدة مع كامل البريكرات الرئيسة والاحتياطية ." },
-            { "مسلسل": 36, "CODE": "E-D-10", "Title": "توريد وتركيب PANEL BOARD 3ph/200amp/8way", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب 3ph/200amp /8 way PANEL BOARD لتغذية لوحات التوزيع القديمة والجديدة مع كامل البريكرات الرئيسة والاحتياطية ." },
-            { "مسلسل": 37, "CODE": "E-D-11", "Title": "توريد وتركيب PANEL BOARD 3ph/400amp/8way", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب 3ph/400amp /8 way PANEL BOARD لتغذية لوحات التوزيع القديمة والجديدة مع كامل البريكرات الرئيسة والاحتياطية ." },
-            { "مسلسل": 38, "CODE": "E-D-12", "Title": "توريد وتركيب PANEL BOARD 3ph/100amp/8way", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب 3ph/100amp /8 way PANEL BOARD لتغذية لوحات التوزيع القديمة والجديدة مع كامل البريكرات الرئيسة والاحتياطية ." },
-            { "مسلسل": 39, "CODE": "E-D-13", "Title": "توريد وتركيب PANEL BOARD 3ph/200amp/12way", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب 3ph/200amp /12way PANEL BOARD لتغذية لوحات التوزيع القديمة والجديدة مع كامل البريكرات الرئيسة والاحتياطية ." },
-            { "مسلسل": 40, "CODE": "E-D-14", "Title": "توريد وتركيب PANEL BOARD 3ph/400amp/12way", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب 3ph/400amp /12way PANEL BOARD لتغذية لوحات التوزيع القديمة والجديدة مع كامل البريكرات الرئيسة والاحتياطية ." },
-            { "مسلسل": 41, "CODE": "E-D-15", "Title": "توريد وتركيب انارة خارجية مخفية", "Unit": "م.ط", "ImageUrl": "", "LongDescription": "توريد وتركيب انارة خارجية مخفية نوعية 15watt/meter LED STRIP LIGHT على حواف الجدران الخارجية الطولية والعرضية وللواجهة الرئيسية وملحقاته حسب اعتماد المهندس المشرف بطرق تثبيت ميكانيكية بحيث تكون حد ادنى IP 65 ، SMD 5050 ، ويجب ان تحتوي على قاعدة معدنية لتفريغ الحرارة HEAT SINK DISIPATION مع جهد تشغيل 24 فولت فقط . مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات" },
-            { "مسلسل": 42, "CODE": "E-D-16", "Title": "توريد وتركيب PANEL BOARD 3ph/250amp/4way", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب 3ph/ 250amp / 4 way PANEL BOARD مع كامل البريكرات الرئيسية والاحتياطية لتغذية لوحات التوزيع القديمة والجديدة." },
-            { "مسلسل": 43, "CODE": "E-D-17", "Title": "توريد وتركيب PANEL BOARD 3ph/250amp/6way", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب 3ph/ 250amp /6 way PANEL BOARD مع كامل البريكرات الرئيسية والاحتياطية لتغذية لوحات التوزيع القديمة والجديدة." },
-            { "مسلسل": 44, "CODE": "E-D-18", "Title": "توريد وتركيب PANEL BOARD 3ph/250amp/8way", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب 3ph/ 250amp /8 way PANEL BOARD مع كامل البريكرات الرئيسية والاحتياطية لتغذية لوحات التوزيع القديمة والجديدة." },
-            { "مسلسل": 45, "CODE": "E-D-19", "Title": "توريد وتركيب PANEL BOARD 3ph/250amp/12way", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب 3ph/ 250amp /12 way PANEL BOARD مع كامل البريكرات الرئيسية والاحتياطية لتغذية لوحات التوزيع القديمة والجديدة." },
-            { "مسلسل": 46, "CODE": "E-E-01", "Title": "توريد وتركيب كشافات LED 100W", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب كشافات نوعية LED COB 100 WATT أو لمبات (CREE POWER LED 100 WATT) في اعلى المنارة مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات . وازالة جميع الانارات الاخرى حولها واسفلها مع تمديداتها بحيث يتم توصيلها وتشغيلها بواسطة كونتاكتر مع تايمر رقمي لسبعة ايام متعدد الضبط مع مفتاح للتشغيل اليدوي" },
-            { "مسلسل": 47, "CODE": "E-E-02", "Title": "توريد وتركيب وحدات إنارة Spot Light 15W", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب وحدات إنارة (Spot Light) من نوعية 15WATT CREE COB WITH DRIVER AND ELECTROSTATIC POWDER COATED ALUMINUM INJECTION BODY , BK7 DIFFUSER في الصالة الرئيسية للقبة من الداخل مع جميع التمديدات اللازمة مخفية والمشار اليها بالرمز E في المخطط" },
-            { "مسلسل": 48, "CODE": "E-E-03", "Title": "توريد وتركيب إنارة خارجية تراثية", "Unit": "مقطوعية", "ImageUrl": "", "LongDescription": "توريد وتركيب إنارة خارجية طابع تراثي decorative steel powder coated type مع LED lamp 9-12 watt مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات وتكون مركبة على اعمدة ستيل بطول 3متر حسب المواصفات بواقع عمود لكل ثلاث وحدات انارة حسب المخطط بحيث يتم توصيلها وتشغيلها بواسطة كونتاكتر مع تايمر رقمي لسبعة ايام متعدد الضبط مع مفتاح للتشغيل اليدوي والوحدة جانبا لعدد الاعمدة واماكن التركيب هو مواقف السيارات" },
-            { "مسلسل": 49, "CODE": "E-E-04", "Title": "توريد وتركيب إنارة خارجية COB/Power LED", "Unit": "مقطوعية", "ImageUrl": "", "LongDescription": "توريد وتركيب إنارة خارجية من نوع COB LED أو Power LED بقدرة تتراوح بين 25 إلى 40 واط، وبدرجة حماية لا تقل عن IP65، ويكون الغطاء في جميع الحالات من Polycarbonate أو Clear Glass BK7، مع تنفيذ كافة التمديدات الكهربائية اللازمة بشكل مخفي وفقًا للمواصفات الفنية المعتمدة. يتم تركيب وحدات الإنارة على أعمدة ستيل بطول 3 أمتار، حسب المخططات المعتمدة وأماكن التركيب المحددة. يتم توصيل وتشغيل الإنارة بواسطة كونتاكتر (Contactor) متصل مع تايمر رقمي متعدد الضبط لسبعة أيام (7-Day Digital Timer) مع مفتاح تشغيل يدوي (Manual Switch) لتمكين التحكم اليدوي عند الحاجة." },
-            { "مسلسل": 50, "CODE": "E-E-05", "Title": "توريد وتركيب إنارة غاطسة In Ground", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب إنارة خارجية نوعية كشافات الإضاءة الغاطسة :(In Ground Luminaire)تكون شديدة التحمل ( Heavy Duty)، لا تقل درجة الحماية عن (IP68) و تكون من النوع (Adjustable Uplight) وتستخدم لمبات (POWER LED 12 WATT" },
-            { "مسلسل": 51, "CODE": "E-E-06", "Title": "توريد وتركيب WALLWASHER LED", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب إنارة خارجية نوعية WALLWASHER LED RGBWA SURFACE MOUNTED بقدرة 40 وات بواقع 36 LED في الوحدة على الاقل ويتم ضبط اللون على اللون العنبر . ويكون التحكم مركزي بالأضافة للتحكم الضوئي والزمني لاضاءة ." },
-            { "مسلسل": 52, "CODE": "E-E-07", "Title": "توريد وتركيب WALLWASHER LED لونين", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب إنارة خارجية نوعية WALLWASHER LED RGBWA SURFACE MOUNTED بقدرة 40 وات بواقع 36 LED في الوحدة على الاقل ويتم ضبط اللون على اللون العنبر . ويكون التحكم مركزي بالأضافة للتحكم الضوئي والزمني لاضاءة الحوائط الخارجية بحيث يضبط اللون الى لونين ابيض COOL TD في المناطق المنخفضة المستوى والى لون WARM LIGHT في المناطق البارزة بحيث يتم شمل كامل عرض وطول الحوائط بدون اية فراغات" },
-            { "مسلسل": 53, "CODE": "E-E-08", "Title": "توريد وتركيب وحدة انارة LED TUBE", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب وحدة انارة داخلية تحتوي LED TUBE 4FEET 21 WATT OR WATT1*18 مع غطاء UV PROTECTED DIFUSER مخفية بكورنيش ديكور الجبس الجديد ومثبته على الاسطح الدخلية او بواسطة براكيتس مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات" },
-            { "مسلسل": 54, "CODE": "E-F-01", "Title": "تبديل جميع السوتشات والسوكتات", "Unit": "مقطوعية", "ImageUrl": "", "LongDescription": "تبديل جميع السوتشات والسوكتات الى جديد والبند يشمل مفاتيح المكيفات والمخارج لها والمفاتيح الخارجية الى W.P" },
-            { "مسلسل": 55, "CODE": "E-F-02", "Title": "ازالة جميع المراوح", "Unit": "مقطوعية", "ImageUrl": "", "LongDescription": "ازالة جميع المراوح السقفية والجدارية مع جميع التمديدات التابعة لها" },
-            { "مسلسل": 56, "CODE": "E-F-03", "Title": "ازالة جميع الترنكات والوايرات", "Unit": "مقطوعية", "ImageUrl": "", "LongDescription": "ازالة جميع الترنكات والوايرات الداخلية والخارجية الظاهرة واخفاء اللازم منها داخل الجدران وازالة جميع الانارات العشوائية الجانبية مع تمديداتها" },
-            { "مسلسل": 57, "CODE": "E-G-01", "Title": "توريد وتركيب خزانة خدمة كهربائية", "Unit": "مقطوعية", "ImageUrl": "", "LongDescription": "توريد وتركيب خزانة خدمة كهربائية على جدار من الطابوق على حدود ارض الاوقاف وحسب الموقع المحدد بالمخطط المرفق ، شاملا جميع الاعمال المدنية والتشطيبات الخاصة بالجدار حسب مواصفات كهرماء ، وتوصيل مع شبك كيبل مسلح 3 فاز مع الايرث داخل بايبات 4 انش ما بين الخزانة والمكان المطلوب ، وعمل ما يلزم من تركيب لود وير وجي أي ترنكي او اي ملاحظات اخرى واردة من مفتش كهرماء" },
-            { "مسلسل": 58, "CODE": "E-H-01", "Title": "توريد وتركيب مراوح شفط 8 انش", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب مراوح شفط 8 انش في الحمام ذات اغلاق اوتوماتيكي مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات" },
-            { "مسلسل": 59, "CODE": "E-I-01", "Title": "توريد وتركيب LV PANNEL", "Unit": "مقطوعية", "ImageUrl": "", "LongDescription": "توريد وتركيب LV PANNEL 16 PLUG AND PLAY OUTGOING MCCB.S WITH MINIMUM TYPE OF SEPARATION 3B TYPE 2 WITH REMOVABLE MAIN ACB 1250 AMP with ARMS ( arcflash reduction maintinance system ) with 65 KA PER SECONED SHORT CIRCUIT CAPACITY and shutter mechanism to increase the level of protection مع عمل كل متطلبات كهرماء قبل عملية القطع والوصل مثل تقديم دراسة لمنظومة حماية المحول REF مع اخذ موافقة كهرماء عليها وعلى درجة المقاول درجة اولى على الاحمال ورخصة من مخططات تصنيع اللوحة وتعهد من المصنع والمقاول درجة اولى ان التركيبات والتصنيع قد تمت وفق تعليمات كهرماء" },
-            { "مسلسل": 60, "CODE": "E-J-01", "Title": "توريد وتركيب مراوح جدارية", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب مراوح جدارية مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات مع ازالة جميع المراوح الجدارية مع جميع التمديدات التابعة لها وملحقاته والاستفادة فقط من التمديدات المخفية الصالحة للاستخدام" },
-            { "مسلسل": 61, "CODE": "E-J-02", "Title": "توريد وتركيب مراوح سقفية", "Unit": "عدد", "ImageUrl": "", "LongDescription": "توريد وتركيب مراوح سقفية مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات مع ازالة جميع المراوح السقفية القديمة مع جميع التمديدات التابعة لها والاسنفادة فقط من التمديدات المخفية الصالحة للاستخدام" },
-            { "مسلسل": 62, "CODE": "E-K-01", "Title": "عمل مدخل الكيبل الجديد", "Unit": "مقطوعية", "ImageUrl": "", "LongDescription": "عمل مدخل الكيبل الجديد الى نهاية حدود الارض وحسب الموقع الذي يتم تحديده من قبل كهرماء للمقاول المرخص منها ، وتركيب G.I ترنكي ولود واير وعمل كل ما يلزم من ملاحظات مفتش كهرماء بعد تقديم معاملة تقوية القدرة الكهربائية من قبل المقاول المرخص من كهرماء في الاسبوع الاول من استلام المشروع والمتابعة في البلدية وكهرماء الى حين رفع القدرة الكهربائية والتنسيق مع المهندس المشرف لاستصدار الكتب الرسمية اللازمة من الوزارة الى الإدارات المختلفة ويتم تنفيذ هذا البند بعد اخذ موافقة كهرماء عليه ويكون المقاول ملزما بما عدا ذلك كعمل خزانة خدمة خارجية حسب مواصفات كهرماء مع توابعها الانشائية على حدود الارض مع الكيبل وشبكه ان تم طلب ذلك من كهرماء ." },
-            { "مسلسل": 63, "CODE": "E-L-01", "Title": "توريد وتركيب FACP", "Unit": "مقطوعية", "ImageUrl": "", "LongDescription": "توريد وتركيب و أختبار و تشغيل Multi- zones-addressable FACP With rechargable Battery Type مع جميع التمديدات اللازمة بواسطة شركة مختصة معتمدة من الدفاع المدني ومع جميع Smoke and Heat detectors وما يلزم للتشغيل علما ان البند يشمل جميع عناصر fire alarm حسب المواصفات العامة والتفصيلية للدفاع المدني بعد الاعتماد من المهندس المختص في قسم الصيانة" },
-            { "مسلسل": 64, "CODE": "E-L-02", "Title": "توريد وتركيب نظام إطفاء حريق", "Unit": "مقطوعية", "ImageUrl": "", "LongDescription": "توريد وتركيب واختبار وتشغيل نظام إطفاء حريق كامل من نوع المياه المضغوطة (Water-Based System) وفقًا لأحدث المعايير الدولية (NFPA 13 وNFPA 20 وNFPA 25) و المواصفات العامة و التفصيلية للدفاع المدنى، مع جميع الملحقات والمعدات اللازمة لضمان حماية المبنى من مخاطر الحريق." },
-            { "مسلسل": 65, "CODE": "E-L-03", "Title": "توريد وتركيب أجهزة انذار الحريق", "Unit": "مقطوعية", "ImageUrl": "", "LongDescription": "توريد وتركيب أجهزة انذار الحريق Stand- Alone مع جميع التمديدات اللازمة بواسطة شركة مختصة معتمدة من الدفاع المدني وما يلزم للتشغيل، علما ان البند يشمل جميع عناصر FIRE ALARM SYS المذكورة كالتالي: 1. كاشفات الحريق نوعية الدخانية (Smoke Detector - SD). 2. كاشفات الحريق نوعية الحرارية (Heat Detector - HD). 3. أناره المخارج (Exit light ) . 4. انارة الطوارئ (Emergency light). ونظام أطفاء الحريق بواسطة شركة مختصة معتمدة من الدفاع المدني وما يلزم للتشغيل، علما ان البند يشمل جميع عناصر FIRE FIGHTING SYS المذكورة كالتالي: 1. طفاية حريق نوعية جافة (4كج) للأماكن الضيقة والمطابخ و (6كج) للقاعات الرئيسية المفتوحة. 2. طفاية حريق نوعية غاز ثانى أكسيد الكربون (CO2) الغازية (5كج) لغرف الكهرباء. 3. بطانية مقاومة للحريق (HR FIRE BLANKET) . حسب المواصفات العامة والتفصيلية واعتماد النظامين من الدفاع المدني ان احتاج الامر لذلك ، ومن المهندس المختص في الادارة الهندسية ." },
-            { "مسلسل": 66, "CODE": "E-L-04", "Title": "توريد وتركيب نظام أطفاء الحريق", "Unit": "مقطوعية", "ImageUrl": "", "LongDescription": "توريد وتركيب نظام أطفاء الحريق بواسطة شركة مختصة معتمدة من الدفاع المدني وما يلزم للتشغيل، علما ان البند يشمل جميع عناصر FIRE FIGHTING SYS المذكورة كالتالي: 1. طفاية حريق نوعية جافة (4كج) للأماكن الضيقة والمطابخ و (6كج) للقاعات الرئيسية المفتوحة. 2. طفاية حريق نوعية غاز ثانى أكسيد الكربون (CO2) الغازية (5كج) لغرف الكهرباء. 3. بطانية مقاومة للحريق (HR FIRE BLANKET) . حسب المواصفات العامة والتفصيلية واعتماد النظامين من الدفاع المدني ان احتاج الامر لذلك ، ومن المهندس المختص في الادارة الهندسية ." },
-            { "مسلسل": 67, "CODE": "E-M-01", "Title": "تركيب G.I ترنكي ولود واير", "Unit": "مقطوعية", "ImageUrl": "", "LongDescription": "تركيب G.I ترنكي ولود واير وعمل كل ما يلزم من ملاحظات مفتش كهرماء بعد تقديم معاملة تركيب عداد من قبل المقاول المرخص من كهرماء في الاسبوع الاول من استلام المشروع والمتابعة في البلدية وكهرماء الى حين تركيب العداد والتنسيق مع المهندس المشرف لاستصدار الكتب الرسمية اللازمة من الوزارة الى الإدارات المختلفة ويتم تنفيذ هذا البند بعد اخذ موافقة كهرماء عليه" }
+            {"مسلسل":1.0,"CODE":"E-A-01","Title":"مفتاح انارة مفرد","LongDescription":"","Unit":"عدد", "ImageUrl": ""},
+            {"مسلسل":2.0,"CODE":"E-A-02","Title":"مفتاح انارة مجوز","LongDescription":"","Unit":"عدد", "ImageUrl": ""},
+            {"مسلسل":3.0,"CODE":"E-A-03","Title":"مفتاح انارة ثلاثي","LongDescription":"","Unit":"عدد", "ImageUrl": ""}
         ];
+        
+        function loadAllData() {
+            itemsData = JSON.parse(localStorage.getItem('maintenanceItems')) || initialData;
+            trashData = JSON.parse(localStorage.getItem('maintenanceItems_trash')) || [];
+            inspectionReports = JSON.parse(localStorage.getItem('maintenanceInspectionReports')) || [];
+            completedItemsReports = JSON.parse(localStorage.getItem('maintenanceCompletedItemsReports')) || [];
+            adHocItems = JSON.parse(sessionStorage.getItem('maintenanceAdHocItems')) || [];
+            Object.assign(userSelections, JSON.parse(sessionStorage.getItem('maintenanceSelections')) || {});
+        }
 
-        // All JavaScript functions will be pasted here...
+        function saveAllData() {
+            localStorage.setItem('maintenanceItems', JSON.stringify(itemsData));
+            localStorage.setItem('maintenanceItems_trash', JSON.stringify(trashData));
+            localStorage.setItem('maintenanceInspectionReports', JSON.stringify(inspectionReports));
+            localStorage.setItem('maintenanceCompletedItemsReports', JSON.stringify(completedItemsReports));
+            sessionStorage.setItem('maintenanceAdHocItems', JSON.stringify(adHocItems));
+            sessionStorage.setItem('maintenanceSelections', JSON.stringify(userSelections));
+        }
+
+        function renderItems(filterTerm = '') {
+            const searchTerm = filterTerm.toLowerCase().trim();
+            const itemsGrid = document.getElementById('itemsGrid');
+            itemsGrid.innerHTML = '';
+            const filteredItems = itemsData.filter(item => item.Title.toLowerCase().includes(searchTerm));
+            filteredItems.sort((a, b) => a['مسلسل'] - b['مسلسل']);
+            filteredItems.forEach(item => itemsGrid.appendChild(createGridItem(item)));
+            if (!searchTerm) {
+                itemsGrid.appendChild(createAdHocItemBox());
+            }
+            updateVisualSelections();
+            updateCompletedCounter();
+            updateInspectionCounter();
+        }
+
+        function createGridItem(item) {
+            const gridItem = document.createElement('div');
+            gridItem.className = 'grid-item';
+            gridItem.id = `item-${item['مسلسل']}`;
+            gridItem.onclick = (e) => {
+                if (e.target.classList.contains('selection-checkbox') || e.target.classList.contains('edit-button')) {
+                    return;
+                }
+                editSelection(item['مسلسل']);
+            };
+            const editBtn = document.createElement('button');
+            editBtn.className = 'edit-button';
+            editBtn.innerHTML = '&#9881;';
+            editBtn.onclick = (e) => { e.stopPropagation(); openEditModal(item['مسلسل']); };
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'selection-checkbox';
+            checkbox.id = `check-${item['مسلسل']}`;
+            checkbox.onchange = () => toggleItemSelection(item['مسلسل']);
+            const img = document.createElement('img');
+            img.src = item.ImageUrl || `https://via.placeholder.com/150/808080/FFFFFF?text=Item`;
+            img.alt = item.Title;
+            const title = document.createElement('p');
+            title.textContent = item.Title;
+            gridItem.appendChild(editBtn);
+            gridItem.appendChild(checkbox);
+            gridItem.appendChild(img);
+            gridItem.appendChild(title);
+            return gridItem;
+        }
+
+        function createAdHocItemBox() {
+            const gridItem = document.createElement('div');
+            gridItem.className = 'grid-item adhoc-item';
+            gridItem.style.cursor = 'pointer';
+            gridItem.onclick = addAdHocItem;
+            gridItem.innerHTML = `<img src="https://via.placeholder.com/150/ffc107/000000?text=%2B" alt="إضافات حرة"><p style="font-weight: bold;">إضافة حرة</p>`;
+            return gridItem;
+        }
+        
+        function updateVisualSelections() {
+            document.querySelectorAll('.grid-item').forEach(el => el.classList.remove('selected'));
+            document.querySelectorAll('.selection-checkbox').forEach(cb => cb.checked = false);
+            for (const itemId in userSelections) {
+                const checkEl = document.getElementById(`check-${itemId}`);
+                if (checkEl) {
+                    checkEl.checked = true;
+                    checkEl.parentElement.classList.add('selected');
+                }
+            }
+        }
+        
+        function toggleItemSelection(itemId) {
+            const checkbox = document.getElementById(`check-${itemId}`);
+            if (checkbox.checked) {
+                editSelection(itemId, true);
+            } else {
+                if (confirm('هل أنت متأكد من إلغاء اختيار هذا البند؟ سيتم حذف الكميات والملاحظات المدخلة.')) {
+                    delete userSelections[itemId];
+                } else {
+                    checkbox.checked = true;
+                }
+            }
+            saveAllData();
+            updateVisualSelections();
+        }
+
+        function editSelection(itemId, isNewSelection = false) {
+            const item = itemsData.find(i => i['مسلسل'] === itemId);
+            if (!item) return;
+            if (!isNewSelection && !userSelections[itemId]) {
+                return;
+            }
+            const currentQty = userSelections[itemId] ? userSelections[itemId].quantity : 1;
+            const currentNotes = userSelections[itemId] ? userSelections[itemId].notes : '';
+            const newQuantity = prompt(`تعديل الكمية للبند:\n"${item.Title}"`, currentQty);
+            if (newQuantity === null) {
+                if (isNewSelection) {
+                    document.getElementById(`check-${itemId}`).checked = false;
+                }
+                return;
+            }
+            const quantityNum = parseInt(newQuantity, 10);
+            if (isNaN(quantityNum) || quantityNum <= 0) {
+                delete userSelections[itemId];
+                alert('تم إدخال كمية غير صالحة. تم إلغاء اختيار البند.');
+            } else {
+                const newNotes = prompt(`تعديل الملاحظات (إن وجدت):`, currentNotes);
+                userSelections[itemId] = { quantity: quantityNum, notes: newNotes || '' };
+            }
+            saveAllData();
+            updateVisualSelections();
+        }
+
+        function addAdHocItem() {
+            const description = prompt("أدخل وصف البند المضاف:");
+            if (!description) return;
+            const quantity = prompt("أدخل الكمية:", 1);
+            if (quantity === null || isNaN(quantity) || parseInt(quantity, 10) <= 0) return;
+            const notes = prompt("أدخل الملاحظات (إن وجدت):");
+            adHocItems.push({ id: Date.now(), Title: description, quantity: parseInt(quantity, 10), notes: notes || '', isSelected: true });
+            saveAllData();
+            alert(`تمت إضافة "${description}" إلى قائمة الإضافات.`);
+        }
+        
+        function exportData() {
+            const dataBundle = { items: itemsData, trash: trashData, reports: inspectionReports, completed: completedItemsReports };
+            const dataString = JSON.stringify(dataBundle, null, 2);
+            const blob = new Blob([dataString], { type: 'application/json' });
+            const link = document.createElement("a");
+            link.setAttribute("href", URL.createObjectURL(blob));
+            link.setAttribute("download", "maintenance_data.json");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            alert('تم تصدير ملف البيانات (maintenance_data.json) بنجاح.');
+        }
+
+        function importData() {
+            document.getElementById('importFileInput').click();
+        }
+
+        function handleFileImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.items && data.trash && data.reports && data.completed) {
+                        itemsData = data.items || initialData;
+                        trashData = data.trash || [];
+                        inspectionReports = data.reports || [];
+                        completedItemsReports = data.completed || [];
+                        saveAllData();
+                        renderItems();
+                        alert('تم استيراد البيانات بنجاح!');
+                    } else { alert('خطأ: صيغة ملف البيانات غير صحيحة.'); }
+                } catch (error) { alert('خطأ: الملف غير صالح أو تالف.'); }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+        
+        function openNewItemModal() {
+            document.getElementById('modalTitle').innerText = "إضافة بند جديد";
+            ['editTitle', 'editLongDesc', 'editImageUrl', 'editCode', 'editUnit'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('deleteBtn').style.display = 'none';
+            document.getElementById('saveBtn').onclick = () => addNewItem();
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        function openEditModal(itemId) {
+            const item = itemsData.find(i => i['مسلسل'] === itemId);
+            if (!item) return;
+            document.getElementById('modalTitle').innerText = "تحرير البند";
+            document.getElementById('editTitle').value = item.Title;
+            document.getElementById('editLongDesc').value = item.LongDescription || '';
+            document.getElementById('editImageUrl').value = item.ImageUrl || '';
+            document.getElementById('editCode').value = item.CODE;
+            document.getElementById('editUnit').value = item.Unit;
+            document.getElementById('deleteBtn').style.display = 'block';
+            document.getElementById('saveBtn').onclick = () => saveEditedItem(itemId);
+            document.getElementById('deleteBtn').onclick = () => deleteItem(itemId);
+            document.getElementById('editModal').style.display = 'flex';
+        }
+        
+        function closeEditModal() { document.getElementById('editModal').style.display = 'none'; }
+        
+        function addNewItem() {
+            const allIds = [...itemsData, ...trashData].map(i => i['مسلسل']);
+            const maxId = Math.max(0, ...allIds);
+            itemsData.push({ 'مسلسل': maxId + 1, Title: document.getElementById('editTitle').value, LongDescription: document.getElementById('editLongDesc').value, ImageUrl: document.getElementById('editImageUrl').value, CODE: document.getElementById('editCode').value, Unit: document.getElementById('editUnit').value });
+            saveAllData(); renderItems(); closeEditModal();
+        }
+
+        function saveEditedItem(itemId) {
+            const idx = itemsData.findIndex(i => i['مسلسل'] === itemId);
+            if (idx > -1) {
+                Object.assign(itemsData[idx], { Title: document.getElementById('editTitle').value, LongDescription: document.getElementById('editLongDesc').value, ImageUrl: document.getElementById('editImageUrl').value, CODE: document.getElementById('editCode').value, Unit: document.getElementById('editUnit').value });
+                saveAllData(); renderItems(); closeEditModal();
+            }
+        }
+
+        function deleteItem(itemId) {
+            if (confirm(`هل أنت متأكد؟ سيتم نقل البند إلى سلة المحذوفات.`)) {
+                const idx = itemsData.findIndex(i => i['مسلسل'] === itemId);
+                if (idx > -1) {
+                    trashData.push(itemsData.splice(idx, 1)[0]);
+                    delete userSelections[itemId];
+                    saveAllData(); renderItems(); closeEditModal();
+                }
+            }
+        }
+        
+        function openTrashModal() {
+            const list = document.getElementById('trashList');
+            list.innerHTML = trashData.length === 0 ? '<li>سلة المحذوفات فارغة.</li>' : '';
+            trashData.forEach(item => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span class="item-title">${item.Title}</span><div class="item-buttons"><button class="restore-btn" onclick="restoreItem(${item['مسلسل']})">استرجاع</button><button class="perm-delete-btn" onclick="deletePermanently(${item['مسلسل']})">حذف نهائي</button></div>`;
+                list.appendChild(li);
+            });
+            document.getElementById('trashModal').style.display = 'flex';
+        }
+        
+        function closeTrashModal() { document.getElementById('trashModal').style.display = 'none'; }
+        
+        function restoreItem(itemId) {
+            const idx = trashData.findIndex(i => i['مسلسل'] === itemId);
+            if (idx > -1) { itemsData.push(trashData.splice(idx, 1)[0]); saveAllData(); renderItems(); closeTrashModal(); }
+        }
+        
+        function deletePermanently(itemId) {
+            if (confirm(`هل أنت متأكد؟ سيتم حذف هذا البند بشكل نهائي.`)) {
+                const idx = trashData.findIndex(i => i['مسلسل'] === itemId);
+                if (idx > -1) { trashData.splice(idx, 1); saveAllData(); openTrashModal(); }
+            }
+        }
+        
+        function openAdHocModal() {
+            const list = document.getElementById('adHocList');
+            list.innerHTML = adHocItems.length === 0 ? '<li>لا توجد إضافات حالية.</li>' : '';
+            adHocItems.forEach(item => {
+                const li = document.createElement('li');
+                li.innerHTML = `<input type="checkbox" onchange="toggleAdHocSelection(${item.id})" ${item.isSelected ? 'checked' : ''}><span class="item-title">${item.Title} (الكمية: ${item.quantity})</span><div class="item-buttons"><button class="perm-delete-btn" onclick="deleteAdHocItem(${item.id})">حذف</button></div>`;
+                list.appendChild(li);
+            });
+            document.getElementById('adHocModal').style.display = 'flex';
+        }
+
+        function closeAdHocModal() { document.getElementById('adHocModal').style.display = 'none'; }
+        
+        function toggleAdHocSelection(itemId) {
+            const item = adHocItems.find(i => i.id === itemId);
+            if (item) { item.isSelected = !item.isSelected; saveAllData(); }
+        }
+
+        function deleteAdHocItem(itemId) {
+            const idx = adHocItems.findIndex(i => i.id === itemId);
+            if (idx > -1) { adHocItems.splice(idx, 1); saveAllData(); openAdHocModal(); }
+        }
+
+        function openInspectionReportModal() {
+            document.getElementById('inspectionMosqueNum').value = '';
+            document.getElementById('inspectionArea').value = '';
+            document.getElementById('inspectionNotes').value = '';
+            document.getElementById('inspectionReportModal').style.display = 'flex';
+        }
+
+        function closeInspectionReportModal() { document.getElementById('inspectionReportModal').style.display = 'none'; }
+
+        function addPointToReport() {
+            const textarea = document.getElementById('inspectionNotes');
+            textarea.value += "\n- ";
+            textarea.focus();
+        }
+
+        function saveAndExportInspectionReport() {
+            const mosqueNum = document.getElementById('inspectionMosqueNum').value;
+            const area = document.getElementById('inspectionArea').value;
+            const notes = document.getElementById('inspectionNotes').value;
+            if (!mosqueNum && !area && !notes) { alert("الرجاء ملء حقل واحد على الأقل."); return; }
+            const report = { id: Date.now(), mosqueNum, area, notes, date: new Date().toISOString() };
+            inspectionReports.push(report);
+            saveAllData();
+            updateInspectionCounter();
+            const textContent = `تقرير كشف مسجد\n====================\nرقم المسجد: ${report.mosqueNum}\nالمنطقة: ${report.area}\nتاريخ التقرير: ${new Date(report.date).toLocaleDateString('ar-EG')}\n====================\n\nالملاحظات:\n--------------------\n${report.notes}`;
+            const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.setAttribute("href", URL.createObjectURL(blob));
+            link.setAttribute("download", `تقرير كشف ${report.mosqueNum || 'جديد'}.txt`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            alert("تم حفظ واستخراج التقرير بنجاح.");
+            closeInspectionReportModal();
+        }
+        
+        function formatLongTextForExcel(text, wordsPerLine = 25) {
+            if (!text || typeof text !== 'string') return '';
+            const words = text.split(/\s+/); let newText = '';
+            for (let i = 0; i < words.length; i++) {
+                newText += words[i] + ' ';
+                if ((i + 1) % wordsPerLine === 0 && i < words.length - 1) newText += '\n';
+            }
+            return newText.trim();
+        }
+
+        function generateItemsReport() {
+            const selectedStandard = Object.keys(userSelections).length > 0;
+            const selectedAdHoc = adHocItems.some(i => i.isSelected);
+            if (!selectedStandard && !selectedAdHoc) { alert("لم يتم اختيار أي بنود."); return; }
+            const mosqueName = prompt("الرجاء إدخال اسم المسجد (سيتم استخدامه كاسم للملف):");
+            if (!mosqueName) return;
+            const engineerName = prompt("الرجاء إدخال اسم المهندس المصمم:");
+            if (!engineerName) return;
+            const fileName = mosqueName;
+            const reportSnapshot = {
+                id: Date.now(), fileName, mosqueName, engineerName, date: new Date().toISOString(),
+                userSelections: JSON.parse(JSON.stringify(userSelections)),
+                adHocItems: JSON.parse(JSON.stringify(adHocItems.filter(i => i.isSelected))),
+                itemsDataSnapshot: JSON.parse(JSON.stringify(itemsData))
+            };
+            completedItemsReports.push(reportSnapshot);
+            let csvContent = "مسلسل,CODE,العنوان,الوصف التفصيلي,Unit,QTY,الملاحظات\n";
+            const escapeCSV = (str) => `"${String(str || '').replace(/"/g, '""')}"`;
+            reportSnapshot.itemsDataSnapshot.sort((a,b) => a['مسلسل'] - b['مسلسل']).forEach(item => {
+                const selection = reportSnapshot.userSelections[item['مسلسل']];
+                if (selection) {
+                    const row = [item['مسلسل'], item.CODE, item.Title, formatLongTextForExcel(item.LongDescription), item.Unit, selection.quantity, selection.notes].map(escapeCSV).join(',');
+                    csvContent += row + "\n";
+                }
+            });
+            if (reportSnapshot.adHocItems.length > 0) {
+                csvContent += "\n--- إضافات حرة ---\n";
+                reportSnapshot.adHocItems.forEach(item => {
+                    const row = ["-", "AD-HOC", item.Title, "", "", item.quantity, item.notes].map(escapeCSV).join(',');
+                    csvContent += row + "\n";
+                });
+            }
+            const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.setAttribute("href", URL.createObjectURL(blob));
+            link.setAttribute("download", `${fileName}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            Object.keys(userSelections).forEach(key => delete userSelections[key]);
+            adHocItems = [];
+            saveAllData();
+            renderItems();
+            alert("تم إنشاء التقرير بنجاح، وتمت أرشفته في سجل التقارير المنجزة.");
+        }
+
+        function updateCompletedCounter() {
+            document.getElementById('completedReportsCounter').innerText = `عدد تقارير البنود المنجزة: ${completedItemsReports.length}`;
+        }
+        
+        function updateInspectionCounter() {
+            document.getElementById('inspectionReportsCounter').innerText = `عدد تقارير الكشف المنجزة: ${inspectionReports.length}`;
+        }
+
+        function openCompletedReportsModal() {
+            const list = document.getElementById('completedReportsList');
+            list.innerHTML = completedItemsReports.length === 0 ? '<li>لا توجد تقارير منجزة بعد.</li>' : '';
+            completedItemsReports.sort((a, b) => new Date(b.date) - new Date(a.date));
+            completedItemsReports.forEach(report => {
+                const li = document.createElement('li');
+                const reportDate = new Date(report.date).toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' });
+                li.innerHTML = `<div class="item-info"><span class="item-title">${report.fileName}.csv</span><div class="item-buttons"><button class="restore-btn" onclick="redownloadReport(${report.id})">تحميل</button><button class="perm-delete-btn" onclick="deleteCompletedReport(${report.id})">حذف</button></div></div><div class="item-meta"><span>تاريخ الإنشاء: ${reportDate}</span> | <span>المهندس: ${report.engineerName || 'غير محدد'}</span></div>`;
+                list.appendChild(li);
+            });
+            document.getElementById('completedReportsModal').style.display = 'flex';
+        }
+
+        function closeCompletedReportsModal() { document.getElementById('completedReportsModal').style.display = 'none'; }
+
+        function redownloadReport(reportId) {
+            const report = completedItemsReports.find(r => r.id === reportId);
+            if (!report) { alert('لم يتم العثور على التقرير.'); return; }
+            let csvContent = "مسلسل,CODE,العنوان,الوصف التفصيلي,Unit,QTY,الملاحظات\n";
+            const escapeCSV = (str) => `"${String(str || '').replace(/"/g, '""')}"`;
+            report.itemsDataSnapshot.sort((a,b) => a['مسلسل'] - b['مسلسل']).forEach(item => {
+                const selection = report.userSelections[item['مسلسل']];
+                if (selection) {
+                    const row = [item['مسلسل'], item.CODE, item.Title, formatLongTextForExcel(item.LongDescription), item.Unit, selection.quantity, selection.notes].map(escapeCSV).join(',');
+                    csvContent += row + "\n";
+                }
+            });
+            if (report.adHocItems && report.adHocItems.length > 0) {
+                csvContent += "\n--- إضافات حرة ---\n";
+                report.adHocItems.forEach(item => { const row = ["-", "AD-HOC", item.Title, "", "", item.quantity, item.notes].map(escapeCSV).join(','); csvContent += row + "\n"; });
+            }
+            const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.setAttribute("href", URL.createObjectURL(blob));
+            link.setAttribute("download", `${report.fileName}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function deleteCompletedReport(reportId) {
+            if (confirm('هل أنت متأكد من حذف سجل هذا التقرير؟ (هذا الإجراء نهائي).')) {
+                const idx = completedItemsReports.findIndex(r => r.id === reportId);
+                if (idx > -1) { completedItemsReports.splice(idx, 1); saveAllData(); updateCompletedCounter(); openCompletedReportsModal(); }
+            }
+        }
+
+        function openInspectionReportsListModal() {
+            const list = document.getElementById('inspectionReportsList');
+            list.innerHTML = inspectionReports.length === 0 ? '<li>لا توجد تقارير كشف منجزة بعد.</li>' : '';
+            inspectionReports.sort((a, b) => new Date(b.date) - new Date(a.date));
+            inspectionReports.forEach(report => {
+                const li = document.createElement('li');
+                const reportDate = new Date(report.date).toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' });
+                li.innerHTML = `<div class="item-info"><span class="item-title">تقرير مسجد: ${report.mosqueNum || 'غير محدد'}</span><div class="item-buttons"><button class="restore-btn" onclick="redownloadInspectionReport(${report.id})">تحميل</button><button class="perm-delete-btn" onclick="deleteInspectionReport(${report.id})">حذف</button></div></div><div class="item-meta"><span>تاريخ الإنشاء: ${reportDate}</span> | <span>المنطقة: ${report.area || 'غير محدد'}</span></div>`;
+                list.appendChild(li);
+            });
+            document.getElementById('inspectionReportsListModal').style.display = 'flex';
+        }
+
+        function closeInspectionReportsListModal() { document.getElementById('inspectionReportsListModal').style.display = 'none'; }
+        
+        function redownloadInspectionReport(reportId) {
+            const report = inspectionReports.find(r => r.id === reportId);
+            if (!report) { alert('لم يتم العثور على التقرير.'); return; }
+            const textContent = `تقرير كشف مسجد\n====================\nرقم المسجد: ${report.mosqueNum}\nالمنطقة: ${report.area}\nتاريخ التقرير: ${new Date(report.date).toLocaleDateString('ar-EG')}\n====================\n\nالملاحظات:\n--------------------\n${report.notes}`;
+            const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `تقرير كشف ${report.mosqueNum || 'جديد'}.txt`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function deleteInspectionReport(reportId) {
+            if (confirm('هل أنت متأكد من حذف سجل هذا التقرير؟ (هذا الإجراء نهائي).')) {
+                const idx = inspectionReports.findIndex(r => r.id === reportId);
+                if (idx > -1) { inspectionReports.splice(idx, 1); saveAllData(); updateInspectionCounter(); openInspectionReportsListModal(); }
+            }
+        }
+        
+        function updateDateDisplay() {
+            const dateDiv = document.getElementById('dateDisplay');
+            const now = new Date();
+            const dayName = now.toLocaleDateString('ar-EG', { weekday: 'long' });
+            const day = now.getDate();
+            const monthName = now.toLocaleDateString('ar-EG', { month: 'long' });
+            const year = now.getFullYear();
+            dateDiv.innerText = `تاريخ اليوم: ${day} ${monthName}، ${year} - اليوم: ${dayName}`;
+        }
+        
+        function filterItems() {
+            const searchTerm = document.getElementById('searchInput').value;
+            renderItems(searchTerm);
+        }
+        
+        window.onload = () => {
+            loadAllData();
+            renderItems();
+            updateDateDisplay();
+            document.getElementById('importFileInput').addEventListener('change', handleFileImport);
+            document.getElementById('searchInput').addEventListener('input', filterItems);
+            document.querySelectorAll('.modal-overlay').forEach(modal => {
+                modal.addEventListener('click', (e) => { if (e.target === modal) e.target.style.display = 'none'; });
+            });
+        };
     </script>
 </body>
 </html>
