@@ -1,0 +1,519 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>مذكرة للتذكير وحساب التواريخ والدفعات( امر التكليف)</title>
+<style>
+:root{
+  --bg:#eef4f8; --surface:#ffffff; --surface-2:#f8fafc; --text:#0f172a; --muted:#64748b;
+  --border:#dbe4ee; --primary:#0f172a; --primary-2:#0ea5e9; --accent:#0f766e; --danger:#b91c1c;
+  --danger-bg:#fef2f2; --success:#065f46; --success-bg:#ecfdf5; --warning:#92400e; --warning-bg:#fffbeb;
+  --shadow:0 14px 34px rgba(15,23,42,.08); --radius:20px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:Tahoma,Arial,sans-serif;background:linear-gradient(180deg,#eef4f8 0%,#f8fbfd 100%);color:var(--text)}
+.header{background:linear-gradient(135deg,#0f172a 0%,#1e293b 55%,#164e63 100%);color:#fff;padding:28px 20px 30px;box-shadow:var(--shadow)}
+.header-wrap{max-width:1450px;margin:auto;display:flex;justify-content:space-between;gap:20px;align-items:center}
+.header-title h1{margin:0;font-size:30px;font-weight:900;letter-spacing:.2px}
+.header-title p{margin:10px 0 0;color:#d7e3ef;font-size:14px;line-height:1.9}
+.header-actions{display:flex;gap:10px;flex-wrap:wrap}
+.mini-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);padding:10px 14px;border-radius:999px;font-size:12px;font-weight:700}
+.container{max-width:1450px;margin:auto;padding:22px}
+.layout{display:grid;grid-template-columns:460px 1fr;gap:22px;align-items:start}
+.card{background:var(--surface);border:1px solid #edf2f7;border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;margin-bottom:18px}
+.card h2,.card h3{margin:0 0 14px;font-size:18px;color:var(--text)}
+.section-sub{font-size:12px;color:var(--muted);margin:-6px 0 16px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field.full{grid-column:1/-1}
+label{font-size:13px;color:var(--muted);font-weight:800}
+input,select,textarea{width:100%;padding:12px 13px;border-radius:12px;border:1px solid #cbd5e1;background:#fff;font-size:14px;color:var(--text);outline:none;transition:.2s}
+textarea{min-height:88px;resize:vertical}
+input:focus,select:focus,textarea:focus{border-color:#38bdf8;box-shadow:0 0 0 4px rgba(14,165,233,.12)}
+.actions{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:16px}
+button{border:none;border-radius:14px;padding:12px 14px;font-size:14px;font-weight:900;cursor:pointer;transition:.18s;box-shadow:0 2px 0 rgba(0,0,0,.03)}
+button:hover{transform:translateY(-1px)}
+button:active{transform:translateY(0)}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-secondary{background:var(--primary-2);color:#fff}
+.btn-soft{background:#e0f2fe;color:#075985}
+.btn-muted{background:#f1f5f9;color:#334155}
+.btn-danger{background:#fee2e2;color:#991b1b}
+.btn-success{background:#dcfce7;color:#166534}
+.status{display:none;margin-top:12px;border-radius:14px;padding:12px 14px;font-size:13px;font-weight:700}
+.status.success{display:block;background:var(--success-bg);border:1px solid #bbf7d0;color:var(--success)}
+.status.error{display:block;background:var(--danger-bg);border:1px solid #fecaca;color:var(--danger)}
+.status.warning{display:block;background:var(--warning-bg);border:1px solid #fde68a;color:var(--warning)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+.kpi{background:#fff;border:1px solid var(--border);border-radius:18px;padding:16px;box-shadow:0 6px 14px rgba(15,23,42,.04)}
+.kpi .label{font-size:12px;color:var(--muted);font-weight:800;margin-bottom:8px}
+.kpi .value{font-size:20px;font-weight:900;line-height:1.5}
+.report-shell{background:var(--surface);padding:20px;border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid #edf2f7}
+.report{background:#fff;border:1px solid var(--border);border-radius:20px;padding:28px}
+.report-title{text-align:center;font-size:26px;font-weight:900;margin-bottom:10px;color:#0f172a}
+.report-sub{text-align:center;color:var(--muted);font-size:13px;margin-bottom:20px}
+.meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.meta-box{border:1px solid var(--border);background:#fcfdff;border-radius:16px;padding:14px}
+.meta-box h4{margin:0 0 10px;font-size:16px}
+.meta-row{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px dashed #e5e7eb;font-size:14px}
+.meta-row:last-child{border-bottom:none}
+.meta-row .key{color:#475569;font-weight:800}
+.meta-row .val{font-weight:900;text-align:left}
+.table-wrap{margin-top:16px;border:1px solid var(--border);border-radius:16px;overflow:hidden}
+table{width:100%;border-collapse:collapse}
+th,td{padding:11px 10px;border-bottom:1px solid #e5e7eb;text-align:center;font-size:14px}
+th{background:#0f172a;color:#fff}
+tr:nth-child(even) td{background:#fbfdff}
+.summary{margin-top:16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:16px;padding:16px;font-size:14px;line-height:2;color:#334155}
+.note{margin-top:12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:16px;padding:14px;font-size:13px;line-height:1.9;color:#166534}
+.projects-tools{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;margin-bottom:10px}
+.saved-list{display:flex;flex-direction:column;gap:10px;max-height:420px;overflow:auto;padding-left:2px}
+.saved-item{border:1px solid var(--border);border-radius:16px;background:#fbfdff;padding:12px}
+.saved-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.saved-title{font-size:14px;font-weight:900}
+.saved-sub{font-size:12px;color:var(--muted);margin-top:4px}
+.saved-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.saved-actions button{padding:8px 10px;font-size:12px;border-radius:10px}
+.empty{padding:18px;text-align:center;color:var(--muted);background:#f8fafc;border:1px dashed #cbd5e1;border-radius:14px}
+.badge{display:inline-block;background:#e0f2fe;color:#075985;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:900}
+.hidden{display:none !important}
+.footer-hint{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.8}
+.print-only{display:none}
+@media (max-width:1150px){.layout{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:720px){.grid,.meta-grid,.actions,.kpis,.projects-tools{grid-template-columns:1fr}.header-wrap{flex-direction:column;align-items:flex-start}.header-actions{width:100%}}
+@media print{
+  body{background:#fff}
+  .header,.panel,.screen-only,.projects-panel,.status{display:none !important}
+  .container{max-width:none;padding:0}
+  .layout{display:block}
+  .report-shell,.report{box-shadow:none;border:none;padding:0;margin:0;border-radius:0}
+  .kpis{display:none}
+  .print-only{display:block}
+}
+</style>
+</head>
+<body>
+<header class="header">
+  <div class="header-wrap">
+    <div class="header-title">
+      <h1>مذكرة للتذكير وحساب التواريخ والدفعات( امر التكليف)</h1>
+      <p>نظام هندسي متكامل لحساب تواريخ العقد والدفعات والتمديد وغرامات التأخير - م. نصار وائل نصار PDF.</p>
+    </div>
+    <div class="header-actions">
+      <span class="mini-badge">واجهة احترافية</span>
+      <span class="mini-badge">حفظ محلي + نسخ احتياطي</span>
+      <span class="mini-badge">جاهز للطباعة</span>
+    </div>
+  </div>
+</header>
+<main class="container">
+  <div class="layout">
+    <section class="panel">
+      <div class="card">
+        <h2>بيانات المشروع والعقد</h2>
+        <div class="section-sub">أدخل جميع المعلومات الأساسية ليتم احتساب النتائج وتحديث المعاينة الرسمية مباشرة.</div>
+        <div id="selectedBadge" class="badge hidden">جاري تحرير مشروع محفوظ</div>
+        <div class="grid">
+          <div class="field full"><label for="project">اسم المشروع</label><input id="project" placeholder="اسم المشروع" /></div>
+          <div class="field"><label for="book">رقم الكتاب</label><input id="book" placeholder="رقم الكتاب" /></div>
+          <div class="field"><label for="hijri">التاريخ الهجري</label><input id="hijri" placeholder="التاريخ الهجري" /></div>
+          <div class="field"><label for="greg">التاريخ الميلادي</label><input id="greg" type="date" /></div>
+          <div class="field"><label for="total">قيمة العقد</label><input id="total" type="number" placeholder="قيمة العقد" /></div>
+          <div class="field full"><label for="start">تاريخ بداية تنفيذ الأعمال المطلوبة</label><input id="start" type="date" /></div>
+          <div class="field"><label for="days">مدة التنفيذ (يوم)</label><input id="days" type="number" placeholder="مدة التنفيذ (يوم)" /></div>
+          <div class="field"><label for="extension">التمديد (اختياري)</label><input id="extension" type="number" placeholder="التمديد (يوم)" /></div>
+          <div class="field"><label for="delayDays">مدة التأخير (يوم)</label><input id="delayDays" type="number" placeholder="مدة التأخير (يوم)" /></div>
+          <div class="field"><label for="penaltyRate">قيمة الغرامة لليوم</label><input id="penaltyRate" type="number" placeholder="قيمة الغرامة لليوم" /></div>
+        </div>
+      </div>
+
+
+      <div class="card">
+        <h3>الدفعات وتواريخ الاستحقاق</h3>
+        <div class="grid">
+          <div class="field"><label for="p1">نسبة الدفعة الأولى %</label><input id="p1" type="number" placeholder="دفعة 1 %" /></div>
+          <div class="field"><label for="due1">تاريخ استحقاق الدفعة الأولى</label><input id="due1" placeholder="يُكتب هنا" /></div>
+          <div class="field"><label for="p2">نسبة الدفعة الثانية %</label><input id="p2" type="number" placeholder="دفعة 2 %" /></div>
+          <div class="field"><label for="due2">تاريخ استحقاق الدفعة الثانية</label><input id="due2" placeholder="يُكتب هنا" /></div>
+          <div class="field"><label for="p3">نسبة الدفعة الثالثة %</label><input id="p3" type="number" placeholder="دفعة 3 %" /></div>
+          <div class="field"><label for="due3">تاريخ استحقاق الدفعة الثالثة</label><input id="due3" placeholder="يُكتب هنا" /></div>
+          <div class="field"><label for="p4">نسبة الدفعة الرابعة %</label><input id="p4" type="number" placeholder="دفعة 4 %" /></div>
+          <div class="field"><label for="due4">تاريخ استحقاق الدفعة الرابعة</label><input id="due4" placeholder="يُكتب هنا" /></div>
+        </div>
+        <div id="percentStatus" class="status warning">مجموع نسب الدفعات الحالية: 0%</div>
+        <div class="actions screen-only">
+          <button id="calcBtn" class="btn-primary" type="button">احسب</button>
+          <button id="printBtn" class="btn-secondary" type="button">طباعة PDF</button>
+          <button id="saveBtn" class="btn-soft" type="button">حفظ المشروع</button>
+          <button id="clearBtn" class="btn-muted" type="button">تفريغ النموذج</button>
+          <button id="exportBtn" class="btn-primary" type="button">إصدار نسخة</button>
+          <button id="importBtn" class="btn-soft" type="button">استيراد نسخة</button>
+          <button id="exportAllBtn" class="btn-success" type="button">نسخ احتياطي لكل المشاريع</button>
+          <button id="deleteCurrentBtn" class="btn-danger" type="button">حذف المشروع الحالي</button>
+        </div>
+        <input id="importFile" class="hidden" type="file" accept="application/json" />
+        <div id="statusBox" class="status"></div>
+        <div class="footer-hint">الحفظ المحلي يعتمد على نفس المتصفح والجهاز. لنقل البيانات إلى جهاز آخر استخدم <strong>إصدار نسخة</strong> أو <strong>نسخ احتياطي لكل المشاريع</strong> ثم <strong>استيراد نسخة</strong>.</div>
+      </div>
+
+
+      <div class="card projects-panel">
+        <h3>المشاريع المحفوظة</h3>
+        <div class="projects-tools">
+          <input id="searchProjects" placeholder="ابحث باسم المشروع أو رقم الكتاب" />
+          <button id="refreshSavedBtn" class="btn-muted" type="button">تحديث القائمة</button>
+          <button id="clearAllBtn" class="btn-danger" type="button">حذف الكل</button>
+        </div>
+        <div id="savedProjects" class="saved-list"></div>
+      </div>
+    </section>
+
+
+    <section>
+      <div class="report-shell">
+        <div class="kpis">
+          <div class="kpi"><div class="label">قيمة العقد</div><div class="value" id="kpiTotal">0 ر.ق</div></div>
+          <div class="kpi"><div class="label">تاريخ الانتهاء الأساسي</div><div class="value" id="kpiEnd1">-</div></div>
+          <div class="kpi"><div class="label">الانتهاء بعد التمديد</div><div class="value" id="kpiEnd2">-</div></div>
+          <div class="kpi"><div class="label">إجمالي الغرامة</div><div class="value" id="kpiPenalty">0 ر.ق</div></div>
+        </div>
+
+        <div class="report">
+          <div class="report-title" id="docTitle">اسم المشروع</div>
+          <div class="report-sub">نسخة احترافية للطباعة والحفظ PDF</div>
+          <div class="meta-grid">
+            <div class="meta-box">
+              <h4>بيانات مرجعية</h4>
+              <div class="meta-row"><div class="key">رقم الكتاب</div><div class="val" id="vBook">-</div></div>
+              <div class="meta-row"><div class="key">التاريخ الهجري</div><div class="val" id="vHijri">-</div></div>
+              <div class="meta-row"><div class="key">التاريخ الميلادي</div><div class="val" id="vGreg">-</div></div>
+              <div class="meta-row"><div class="key">تاريخ بداية تنفيذ الأعمال</div><div class="val" id="vStart">-</div></div>
+            </div>
+            <div class="meta-box">
+              <h4>تواريخ التنفيذ والجزاءات</h4>
+              <div class="meta-row"><div class="key">قيمة العقد</div><div class="val" id="vTotal">0 ر.ق</div></div>
+              <div class="meta-row"><div class="key">تاريخ الانتهاء الأساسي</div><div class="val" id="vEnd1">-</div></div>
+              <div class="meta-row"><div class="key">التمديد</div><div class="val" id="vExtension">0 يوم</div></div>
+              <div class="meta-row"><div class="key">تاريخ الانتهاء بعد التمديد</div><div class="val" id="vEnd2">-</div></div>
+              <div class="meta-row"><div class="key">إجمالي الغرامة</div><div class="val" id="vPenaltyTotal">0 ر.ق</div></div>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>الدفعة</th>
+                  <th>النسبة</th>
+                  <th>القيمة</th>
+                  <th>تاريخ الاستحقاق</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>الأولى</td><td id="vp1">0%</td><td id="va1">0 ر.ق</td><td id="vd1">__________</td></tr>
+                <tr><td>الثانية</td><td id="vp2">0%</td><td id="va2">0 ر.ق</td><td id="vd2">__________</td></tr>
+                <tr><td>الثالثة</td><td id="vp3">0%</td><td id="va3">0 ر.ق</td><td id="vd3">__________</td></tr>
+                <tr><td>الرابعة</td><td id="vp4">0%</td><td id="va4">0 ر.ق</td><td id="vd4">__________</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+
+          <div class="summary" id="summaryBox">بعد إدخال البيانات والضغط على <strong>احسب</strong> سيتم عرض الملخص النهائي للعقد والتمديد والدفعات والغرامة هنا.</div>
+          <div class="note" id="backupNote">يمكنك حفظ أي مشروع ومراجعته أو تعديله لاحقًا، كما يمكنك إصدار نسخة واستيرادها على أي جهاز آخر.</div>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+<script>
+(function(){
+  'use strict';
+  const STORAGE_KEY = 'contract_projects_v3';
+  let selectedProjectId = null;
+  const months = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+  const $ = (id) => document.getElementById(id);
+  const numericIds = ['total','days','extension','delayDays','penaltyRate','p1','p2','p3','p4'];
+  const textIds = ['project','book','hijri','greg','start','due1','due2','due3','due4'];
+
+
+  function num(v){ const n = Number(v); return Number.isFinite(n) ? n : 0; }
+  function formatNumber(v){
+    const n = Number(v);
+    if(!Number.isFinite(n)) return '0';
+    const rounded = Math.round((n + Number.EPSILON) * 100) / 100;
+    return (Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(2).replace(/\.?0+$/,''));
+  }
+  function money(v){ return `${formatNumber(v)} ر.ق`; }
+  function percent(v){ return `${formatNumber(v)}%`; }
+  function safeDateFromInput(v){ if(!v) return null; const d = new Date(v + 'T12:00:00'); return Number.isNaN(d.getTime()) ? null : d; }
+  function formatDate(d){ if(!d) return '-'; return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`; }
+  function slugify(text){ return String(text || 'project').trim().replace(/\s+/g,'-').replace(/[\\/:*?"<>|]/g,'').slice(0,80) || 'project'; }
+  function escapeHtml(str){ return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
+  function randomId(){ return (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : ('id-' + Date.now() + '-' + Math.random().toString(16).slice(2)); }
+
+
+  function showStatus(message, type){
+    const box = $('statusBox');
+    box.className = `status ${type}`;
+    box.textContent = message;
+  }
+  function clearStatus(){ const box = $('statusBox'); box.className = 'status'; box.textContent = ''; }
+
+
+  function readForm(){
+    const data = { id: selectedProjectId || randomId(), updatedAt: new Date().toISOString() };
+    textIds.forEach(id => data[id] = $(id).value.trim());
+    numericIds.forEach(id => data[id] = num($(id).value));
+    return data;
+  }
+
+
+  function fillForm(data){
+    [...textIds, ...numericIds].forEach(id => { if(Object.prototype.hasOwnProperty.call(data, id)) $(id).value = data[id] ?? ''; });
+    selectedProjectId = data.id || null;
+    updateEditingState();
+    renderPreview();
+  }
+
+
+  function clearForm(){
+    [...textIds, ...numericIds].forEach(id => $(id).value = '');
+    selectedProjectId = null;
+    updateEditingState();
+    clearStatus();
+    renderPreview();
+  }
+
+
+  function updateEditingState(){
+    const editing = !!selectedProjectId;
+    $('saveBtn').textContent = editing ? 'تحديث المشروع' : 'حفظ المشروع';
+    $('selectedBadge').classList.toggle('hidden', !editing);
+  }
+
+
+  function loadProjects(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    }catch(_){ return []; }
+  }
+  function saveProjects(list){ localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); }
+  function saveCurrentProject(){
+    const data = readForm();
+    if(!data.project){ showStatus('يرجى إدخال اسم المشروع قبل الحفظ.', 'error'); return; }
+    const list = loadProjects();
+    const idx = list.findIndex(item => item.id === data.id);
+    if(idx >= 0){ list[idx] = data; showStatus('تم تحديث بيانات المشروع المحفوظ بنجاح.', 'success'); }
+    else { list.unshift(data); selectedProjectId = data.id; showStatus('تم حفظ المشروع بنجاح.', 'success'); }
+    saveProjects(list);
+    updateEditingState();
+    renderSavedProjects();
+  }
+  function deleteCurrentProject(){
+    if(!selectedProjectId){ showStatus('لا يوجد مشروع محدد حاليًا للحذف.', 'warning'); return; }
+    const list = loadProjects().filter(item => item.id !== selectedProjectId);
+    saveProjects(list);
+    clearForm();
+    renderSavedProjects();
+    showStatus('تم حذف المشروع الحالي.', 'success');
+  }
+  function deleteProject(id){
+    const list = loadProjects().filter(item => item.id !== id);
+    saveProjects(list);
+    if(selectedProjectId === id){ selectedProjectId = null; updateEditingState(); }
+    renderSavedProjects();
+    renderPreview();
+    showStatus('تم حذف المشروع المحفوظ.', 'success');
+  }
+
+  function openProject(id){
+    const item = loadProjects().find(x => x.id === id);
+    if(!item){ showStatus('تعذر العثور على المشروع المطلوب.', 'error'); return; }
+    fillForm(item);
+    showStatus('تم تحميل المشروع ويمكنك الآن تحريره.', 'success');
+  }
+  function downloadJson(data, fileName){
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+  function exportCurrent(){
+    const data = readForm();
+    if(!data.project){ showStatus('يرجى تعبئة بيانات المشروع أولاً قبل إصدار النسخة.', 'error'); return; }
+    downloadJson(data, `${slugify(data.project)}.json`);
+    showStatus('تم إصدار نسخة من المشروع الحالي.', 'success');
+  }
+  function exportSavedProject(id){
+    const item = loadProjects().find(x => x.id === id);
+    if(!item){ showStatus('المشروع غير موجود في القائمة المحفوظة.', 'error'); return; }
+    downloadJson(item, `${slugify(item.project)}.json`);
+    showStatus('تم إصدار نسخة من المشروع المحفوظ.', 'success');
+  }
+  function exportAllProjects(){
+    const list = loadProjects();
+    if(!list.length){ showStatus('لا توجد مشاريع محفوظة لتصديرها.', 'warning'); return; }
+    downloadJson(list, `all-projects-backup.json`);
+    showStatus('تم إنشاء نسخة احتياطية لكل المشاريع.', 'success');
+  }
+  function importFileHandler(event){
+    const file = event.target.files && event.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e){
+      try{
+        const parsed = JSON.parse(String(e.target.result || ''));
+        if(Array.isArray(parsed)){
+          const existing = loadProjects();
+          const map = new Map(existing.map(item => [item.id, item]));
+          parsed.forEach(item => { if(item && typeof item === 'object'){ item.id = item.id || randomId(); map.set(item.id, item); } });
+          saveProjects(Array.from(map.values()));
+          renderSavedProjects();
+          showStatus('تم استيراد النسخة الاحتياطية لجميع المشاريع بنجاح.', 'success');
+        }else if(parsed && typeof parsed === 'object'){
+          parsed.id = parsed.id || randomId();
+          fillForm(parsed);
+          showStatus('تم استيراد نسخة مشروع واحدة بنجاح. يمكنك حفظها ضمن المشاريع الآن.', 'success');
+        }else{
+          throw new Error('invalid');
+        }
+      }catch(_){ showStatus('تعذر استيراد الملف. تأكد أن الملف JSON صحيح.', 'error'); }
+      finally{ event.target.value = ''; }
+    };
+    reader.readAsText(file, 'UTF-8');
+  }
+  function clearAllProjects(){
+    const list = loadProjects();
+    if(!list.length){ showStatus('لا توجد مشاريع محفوظة لحذفها.', 'warning'); return; }
+    localStorage.removeItem(STORAGE_KEY);
+    if(selectedProjectId){ selectedProjectId = null; updateEditingState(); }
+    renderSavedProjects();
+    showStatus('تم حذف جميع المشاريع المحفوظة.', 'success');
+  }
+  function renderSavedProjects(){
+    const wrap = $('savedProjects');
+    const q = $('searchProjects').value.trim().toLowerCase();
+    const list = loadProjects().filter(item => !q || (String(item.project || '').toLowerCase().includes(q) || String(item.book || '').toLowerCase().includes(q)));
+    if(!list.length){ wrap.innerHTML = '<div class="empty">لا توجد مشاريع مطابقة أو محفوظة حتى الآن.</div>'; return; }
+    wrap.innerHTML = list.map(item => `
+      <div class="saved-item">
+        <div class="saved-top">
+          <div>
+            <div class="saved-title">${escapeHtml(item.project || 'بدون اسم')}</div>
+            <div class="saved-sub">رقم الكتاب: ${escapeHtml(item.book || '-')} — آخر تحديث: ${escapeHtml(item.updatedAt ? item.updatedAt.slice(0,10) : '-')}</div>
+          </div>
+          ${selectedProjectId === item.id ? '<span class="badge">محدد</span>' : ''}
+        </div>
+        <div class="saved-actions">
+          <button class="btn-soft" type="button" data-open="${item.id}">تحرير / فتح</button>
+          <button class="btn-primary" type="button" data-export="${item.id}">إصدار نسخة</button>
+          <button class="btn-danger" type="button" data-delete="${item.id}">حذف</button>
+        </div>
+      </div>
+    `).join('');
+  }
+  function renderPreview(){
+    const d = readForm();
+    const startDate = safeDateFromInput(d.start);
+    let end1 = null;
+    let end2 = null;
+    if(startDate){
+      end1 = new Date(startDate);
+      end1.setDate(end1.getDate() + Math.max(0, d.days - 1));
+      end2 = new Date(end1);
+      end2.setDate(end2.getDate() + Math.max(0, d.extension));
+    }
+    const a1 = d.total * d.p1 / 100;
+    const a2 = d.total * d.p2 / 100;
+    const a3 = d.total * d.p3 / 100;
+    const a4 = d.total * d.p4 / 100;
+    const totalPenalty = d.delayDays * d.penaltyRate;
+    const percentSum = d.p1 + d.p2 + d.p3 + d.p4;
+    $('percentStatus').className = `status ${Math.abs(percentSum - 100) < 0.0001 ? 'success' : 'warning'}`;
+    $('percentStatus').textContent = `مجموع نسب الدفعات الحالية: ${formatNumber(percentSum)}%${Math.abs(percentSum - 100) < 0.0001 ? ' — المجموع صحيح' : ' — يفضّل أن يساوي 100%'}`;
+
+
+    $('kpiTotal').textContent = money(d.total);
+    $('kpiEnd1').textContent = formatDate(end1);
+    $('kpiEnd2').textContent = formatDate(end2);
+    $('kpiPenalty').textContent = money(totalPenalty);
+
+
+    $('docTitle').textContent = d.project || 'اسم المشروع';
+    $('vBook').textContent = d.book || '-';
+    $('vHijri').textContent = d.hijri || '-';
+    $('vGreg').textContent = d.greg ? formatDate(safeDateFromInput(d.greg)) : '-';
+    $('vStart').textContent = formatDate(startDate);
+    $('vTotal').textContent = money(d.total);
+    $('vEnd1').textContent = formatDate(end1);
+    $('vExtension').textContent = `${formatNumber(d.extension)} يوم`;
+    $('vEnd2').textContent = formatDate(end2);
+    $('vPenaltyTotal').textContent = money(totalPenalty);
+
+
+    $('vp1').textContent = percent(d.p1); $('va1').textContent = money(a1); $('vd1').textContent = d.due1 || '__________';
+    $('vp2').textContent = percent(d.p2); $('va2').textContent = money(a2); $('vd2').textContent = d.due2 || '__________';
+    $('vp3').textContent = percent(d.p3); $('va3').textContent = money(a3); $('vd3').textContent = d.due3 || '__________';
+    $('vp4').textContent = percent(d.p4); $('va4').textContent = money(a4); $('vd4').textContent = d.due4 || '__________';
+
+
+    $('summaryBox').innerHTML = `
+      <strong>ملخص نهائي:</strong><br>
+      قيمة العقد <strong>${money(d.total)}</strong>، وتاريخ بداية تنفيذ الأعمال <strong>${formatDate(startDate)}</strong>، ومدة التنفيذ <strong>${formatNumber(d.days)} يوم</strong>،
+      وعليه فإن تاريخ الانتهاء الأساسي هو <strong>${formatDate(end1)}</strong>.
+      ${d.extension > 0 ? `تمت إضافة تمديد لمدة <strong>${formatNumber(d.extension)} يوم</strong> ليصبح تاريخ الانتهاء بعد التمديد <strong>${formatDate(end2)}</strong>.` : 'لا يوجد تمديد مضاف على المشروع حالياً.'}
+      أما غرامة التأخير فتم احتسابها على أساس قيمة يومية مقدارها <strong>${money(d.penaltyRate)}</strong> لمدة <strong>${formatNumber(d.delayDays)} يوم</strong>،
+      ليكون إجمالي الغرامة <strong>${money(totalPenalty)}</strong>.
+    `;
+  }
+
+
+  function bindEvents(){
+    $('calcBtn').addEventListener('click', renderPreview);
+    $('printBtn').addEventListener('click', () => window.print());
+    $('saveBtn').addEventListener('click', saveCurrentProject);
+    $('clearBtn').addEventListener('click', clearForm);
+    $('exportBtn').addEventListener('click', exportCurrent);
+    $('importBtn').addEventListener('click', () => $('importFile').click());
+    $('exportAllBtn').addEventListener('click', exportAllProjects);
+    $('deleteCurrentBtn').addEventListener('click', deleteCurrentProject);
+    $('refreshSavedBtn').addEventListener('click', renderSavedProjects);
+    $('clearAllBtn').addEventListener('click', clearAllProjects);
+    $('importFile').addEventListener('change', importFileHandler);
+    $('searchProjects').addEventListener('input', renderSavedProjects);
+
+
+    [...textIds, ...numericIds].forEach(id => {
+      $(id).addEventListener('input', () => { clearStatus(); renderPreview(); });
+    });
+
+
+    $('savedProjects').addEventListener('click', (e) => {
+      const openId = e.target.getAttribute('data-open');
+      const exportId = e.target.getAttribute('data-export');
+      const deleteId = e.target.getAttribute('data-delete');
+      if(openId) openProject(openId);
+      if(exportId) exportSavedProject(exportId);
+      if(deleteId) deleteProject(deleteId);
+    });
+  }
+
+
+  bindEvents();
+  updateEditingState();
+  renderSavedProjects();
+  renderPreview();
+})();
+</script>
+</body>
