@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>رشاقتي - أخصائي التغذية الذكي</title>
+    <!-- Tailwind CSS for modern responsive styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for beautiful icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Cairo for sleek Arabic typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <!-- MathJax for rendering gorgeous scientific LaTeX equations -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #f4fbf7;
+        }
+        /* Custom scrollbar for active horizontal lists */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        /* Scan animation line effect */
+        @keyframes scan {
+            0% { top: 0%; opacity: 1; }
+            50% { top: 100%; opacity: 1; }
+            100% { top: 0%; opacity: 1; }
+        }
+        .scan-line {
+            animation: scan 2s linear infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between text-gray-800">
+
+    <!-- Top App Bar -->
+    <header class="bg-gradient-to-r from-emerald-600 to-teal-700 text-white shadow-md py-4 px-6 sticky top-0 z-50 rounded-b-3xl">
+        <div class="flex justify-between items-center max-w-md mx-auto">
+            <div class="flex items-center space-x-2 space-x-reverse">
+                <div class="bg-white text-emerald-600 p-2.5 rounded-2xl shadow-md flex items-center justify-center w-11 h-11">
+                    <i class="fa-solid fa-apple-whole text-2xl animate-bounce"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-extrabold tracking-tight">رَشاقَتي <span class="text-xs bg-emerald-500/40 text-emerald-100 px-1.5 py-0.5 rounded-md font-normal">v2.0 PRO</span></h1>
+                    <p class="text-[10px] text-emerald-100 font-light">المختبر العلمي المتقدم للذكاء الاصطناعي</p>
+                </div>
+            </div>
+            <div id="calorie-badge" class="bg-emerald-800/80 backdrop-blur-md text-xs py-1.5 px-3 rounded-full font-bold hidden border border-emerald-500/30">
+                <span id="badge-calories">0</span> سعرة متبقية
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container (Simulated Phone View) -->
+    <main class="flex-grow max-w-md w-full mx-auto px-4 py-6 mb-24 overflow-y-auto">
+
+        <!-- ================= TAB 1: CALCULATOR & PROFILE ================= -->
+        <section id="tab-profile" class="tab-content space-y-6">
+            <!-- Scientific Formula Banner -->
+            <div class="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-100 rounded-3xl p-4 text-xs text-emerald-950">
+                <p class="font-bold text-emerald-800 mb-1"><i class="fa-solid fa-circle-info ml-1"></i> الأساس الرياضي للحسابات:</p>
+                <p class="mb-2">يعتمد التطبيق على معادلة <b>Mifflin-St Jeor</b> العالمية لحساب معدل الأيض الأساسي ($BMR$):</p>
+                <div class="bg-white p-2.5 rounded-xl text-center font-mono my-1 border border-emerald-100/50">
+                    $$BMR = 10W + 6.25H - 5A + s$$
+                </div>
+                <p class="text-gray-500 mt-1">حيث أن $W$ هو الوزن بالكيلوجرام، $H$ هو الطول بالسنتمتر، $A$ هو العمر بالسنوات، و قيمة الثابت $s$ تساوي $+5$ للذكور و $-161$ للإناث.</p>
+            </div>
+
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-emerald-100">
+                <h2 class="text-xl font-black text-emerald-800 mb-4 flex items-center">
+                    <i class="fa-solid fa-calculator ml-2 text-emerald-600"></i> الملف الطبي والقياسات
+                </h2>
+                
+                <form id="profile-form" class="space-y-4" onsubmit="calculateDiet(event)">
+                    <!-- Gender selection cards -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">الجنس البيولوجي</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="gender" value="male" class="peer hidden" checked>
+                                <div class="p-3 border-2 border-gray-100 rounded-xl text-center peer-checked:border-emerald-500 peer-checked:bg-emerald-50 hover:bg-gray-50 transition duration-200">
+                                    <i class="fa-solid fa-mars text-blue-500 text-xl block mb-1"></i>
+                                    <span class="text-sm font-medium">ذكر</span>
+                                </div>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="radio" name="gender" value="female" class="peer hidden">
+                                <div class="p-3 border-2 border-gray-100 rounded-xl text-center peer-checked:border-emerald-500 peer-checked:bg-emerald-50 hover:bg-gray-50 transition duration-200">
+                                    <i class="fa-solid fa-venus text-pink-500 text-xl block mb-1"></i>
+                                    <span class="text-sm font-medium">أنثى</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Age, Weight, Height -->
+                    <div class="grid grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">العمر (سنة)</label>
+                            <input type="number" id="age" required min="10" max="100" value="25" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-center font-bold">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">الوزن (كجم)</label>
+                            <input type="number" id="weight" required min="30" max="250" value="75" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-center font-bold">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">الطول (سم)</label>
+                            <input type="number" id="height" required min="100" max="230" value="170" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-center font-bold">
+                        </div>
+                    </div>
+
+                    <!-- Activity Level -->
+                    <div>
+                        <label for="activity" class="block text-sm font-semibold text-gray-700 mb-1">النشاط البدني الفعلي</label>
+                        <select id="activity" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+                            <option value="1.2">خامل جداً (جلوس مستمر، لا رياضة)</option>
+                            <option value="1.375">نشاط خفيف (مشي أو رياضة 1-3 أيام)</option>
+                            <option value="1.55" selected>نشاط متوسط (مقاومة/كارديو 3-5 أيام)</option>
+                            <option value="1.725">نشاط مرتفع (تمارين شاقة يومياً)</option>
+                        </select>
+                    </div>
+
+                    <!-- Diet Goal with scientific description -->
+                    <div>
+                        <label for="goal" class="block text-sm font-semibold text-gray-700 mb-1">الهدف الاستراتيجي الصحي</label>
+                        <select id="goal" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-bold text-emerald-800">
+                            <option value="lose" selected>عجز سعرات معتدل (حرق دهون وحماية العضلات)</option>
+                            <option value="maintain">توازن طاقة كامل (تثبيت الوزن وتحسين الحيوية)</option>
+                            <option value="gain">فائض سعرات مدروس (تضخيم وبناء كتلة عضلية نقية)</option>
+                        </select>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="w-full py-4 bg-emerald-600 text-white rounded-2xl font-bold hover:bg-emerald-700 transition duration-200 shadow-lg shadow-emerald-200 flex items-center justify-center space-x-2 space-x-reverse">
+                        <span>إجراء التحليل العلمي وتجهيز الخطة</span>
+                        <i class="fa-solid fa-stethoscope"></i>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Scientific Results Card -->
+            <div id="results-card" class="bg-gradient-to-br from-emerald-900 via-emerald-950 to-teal-950 text-white rounded-3xl p-6 shadow-xl hidden relative overflow-hidden">
+                <div class="absolute -right-10 -bottom-10 opacity-10 text-9xl">
+                    <i class="fa-solid fa-heart-pulse"></i>
+                </div>
+                
+                <h3 class="text-lg font-black mb-1 flex items-center border-b border-emerald-800 pb-3">
+                    <i class="fa-solid fa-square-poll-vertical ml-2 text-emerald-400"></i> التقرير الطبي لجسدك:
+                </h3>
+
+                <!-- BMI and Water intake -->
+                <div class="grid grid-cols-2 gap-3 my-4">
+                    <div class="bg-emerald-900/40 p-3 rounded-2xl border border-emerald-800/50">
+                        <span class="text-[10px] text-emerald-300 block">مؤشر كتلة الجسم (BMI)</span>
+                        <span id="result-bmi" class="text-lg font-black block text-emerald-100">--</span>
+                        <span id="result-bmi-status" class="text-[10px] bg-emerald-800 px-2 py-0.5 rounded-full inline-block mt-1 font-semibold text-white">--</span>
+                    </div>
+                    <div class="bg-emerald-900/40 p-3 rounded-2xl border border-emerald-800/50">
+                        <span class="text-[10px] text-emerald-300 block">الاحتياج اليومي للمياه</span>
+                        <span id="result-water" class="text-lg font-black block text-emerald-100">--</span>
+                        <span class="text-[10px] text-emerald-300">للحفاظ على هيدرات الجسم</span>
+                    </div>
+                </div>
+
+                <div class="text-center mb-6">
+                    <span class="text-xs uppercase text-emerald-300 block tracking-widest font-semibold">الهدف اليومي الموصى به علمياً</span>
+                    <span id="target-calories-display" class="text-5xl font-black block my-1 text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-100">2100</span>
+                    <span class="text-xs text-emerald-200">سعرة حرارية لتجنب إبطاء الأيض</span>
+                </div>
+
+                <!-- Macros Breakdown -->
+                <p class="text-xs text-emerald-300 font-bold mb-2 text-center"><i class="fa-solid fa-chart-pie ml-1"></i> توزيع الماكروز المقترح حسب هدفك:</p>
+                <div class="grid grid-cols-3 gap-2 text-center bg-emerald-950/60 p-4 rounded-2xl border border-emerald-800/60">
+                    <div>
+                        <span class="text-[10px] text-emerald-400 block font-bold">بروتين</span>
+                        <span id="macro-protein" class="text-sm font-black text-white">--</span>
+                        <span id="macro-protein-pct" class="text-[9px] text-emerald-300 block">0%</span>
+                    </div>
+                    <div class="border-x border-emerald-800">
+                        <span class="text-[10px] text-emerald-400 block font-bold">كربوهيدرات</span>
+                        <span id="macro-carbs" class="text-sm font-black text-white">--</span>
+                        <span id="macro-carbs-pct" class="text-[9px] text-emerald-300 block">0%</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-emerald-400 block font-bold">دهون صحية</span>
+                        <span id="macro-fats" class="text-sm font-black text-white">--</span>
+                        <span id="macro-fats-pct" class="text-[9px] text-emerald-300 block">0%</span>
+                    </div>
+                </div>
+
+                <div class="mt-6 text-center">
+                    <button onclick="switchTab('meals')" class="bg-emerald-500 hover:bg-emerald-400 text-white font-extrabold px-6 py-3 rounded-2xl shadow-md text-sm inline-flex items-center transition duration-150">
+                        <span>الذهاب لجدول الأيام والوجبات</span>
+                        <i class="fa-solid fa-calendar-days mr-2"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 2: MEALS & PLANNER ================= -->
+        <section id="tab-meals" class="tab-content space-y-6 hidden">
+            <!-- Day Selector (Saturday to Friday) -->
+            <div class="flex space-x-2 space-x-reverse overflow-x-auto no-scrollbar py-2 -mx-4 px-4 sticky top-16 bg-emerald-50/90 backdrop-blur-md z-40">
+                <button onclick="selectDay(0)" id="day-btn-0" class="day-tab px-4 py-2.5 rounded-xl text-sm font-extrabold transition duration-150 whitespace-nowrap bg-emerald-600 text-white shadow-md">السبت</button>
+                <button onclick="selectDay(1)" id="day-btn-1" class="day-tab px-4 py-2.5 rounded-xl text-sm font-extrabold transition duration-150 whitespace-nowrap bg-white text-gray-500">الأحد</button>
+                <button onclick="selectDay(2)" id="day-btn-2" class="day-tab px-4 py-2.5 rounded-xl text-sm font-extrabold transition duration-150 whitespace-nowrap bg-white text-gray-500">الاثنين</button>
+                <button onclick="selectDay(3)" id="day-btn-3" class="day-tab px-4 py-2.5 rounded-xl text-sm font-extrabold transition duration-150 whitespace-nowrap bg-white text-gray-500">الثلاثاء</button>
+                <button onclick="selectDay(4)" id="day-btn-4" class="day-tab px-4 py-2.5 rounded-xl text-sm font-extrabold transition duration-150 whitespace-nowrap bg-white text-gray-500">الأربعاء</button>
+                <button onclick="selectDay(5)" id="day-btn-5" class="day-tab px-4 py-2.5 rounded-xl text-sm font-extrabold transition duration-150 whitespace-nowrap bg-white text-gray-500">الخميس</button>
+                <button onclick="selectDay(6)" id="day-btn-6" class="day-tab px-4 py-2.5 rounded-xl text-sm font-extrabold transition duration-150 whitespace-nowrap bg-white text-gray-500">الجمعة</button>
+            </div>
+
+            <!-- Daily Progress tracker card -->
+            <div class="bg-white rounded-3xl p-5 shadow-sm border border-emerald-100">
+                <div class="flex justify-between items-center mb-3">
+                    <div>
+                        <h3 class="text-sm font-black text-gray-700">معدل استهلاك ليوم <span id="current-day-title" class="text-emerald-700">السبت</span></h3>
+                        <p class="text-[10px] text-gray-400">تتبع السعرات والماكروز اليومي المكتمل</p>
+                    </div>
+                    <div class="text-left">
+                        <span class="text-[10px] text-gray-400 block font-semibold">المستهلك الفعلي</span>
+                        <span class="text-lg font-black text-emerald-600"><span id="consumed-calories">0</span> / <span id="target-calories-text">2000</span> سعرة</span>
+                    </div>
+                </div>
+                <!-- Calorie progress bar -->
+                <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+                    <div id="calorie-progress-bar" class="bg-gradient-to-r from-emerald-500 to-teal-500 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+                <div id="calorie-warning" class="text-xs text-rose-500 font-bold mt-2.5 hidden text-center bg-rose-50 p-2 rounded-xl border border-rose-100">
+                    ⚠️ تنبيه علمي: تجاوزت الحد الحراري المستهدف لهذا اليوم!
+                </div>
+            </div>
+
+            <!-- Meal Sections -->
+            <div class="space-y-4">
+                <!-- Breakfast Card -->
+                <div class="bg-white rounded-3xl p-5 shadow-sm border border-emerald-100 relative overflow-hidden">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-xs font-black bg-amber-50 text-amber-700 py-1.5 px-3 rounded-xl flex items-center">
+                            <i class="fa-solid fa-mug-saucer ml-1.5"></i> وجبة الفطور الصحية
+                        </span>
+                        <span id="breakfast-cal" class="text-sm font-bold text-gray-600">350 سعرة</span>
+                    </div>
+                    <p id="breakfast-desc" class="text-sm text-gray-600 font-semibold mb-3 leading-relaxed">شريحتين توست بر مع جبنة بيضاء قليلة الدسم، بيضة مسلوقة، مع كوب شاي أو قهوة بدون سكر ورشة خيار وطماطم طازجة.</p>
+                    <div class="border-t border-dashed border-gray-100 pt-3 flex justify-between items-center">
+                        <span class="text-[10px] text-emerald-600 font-bold"><i class="fa-solid fa-carrot ml-1"></i> ألياف وبروتين عالي للجسم</span>
+                        <div class="flex space-x-1 space-x-reverse">
+                            <button onclick="openAddSnackModal('breakfast')" class="text-xs bg-emerald-50 text-emerald-700 hover:bg-emerald-100 py-1.5 px-2.5 rounded-xl font-bold transition">
+                                <i class="fa-solid fa-plus ml-1"></i> أضف مكونات
+                            </button>
+                            <button onclick="openVisionAIModal('breakfast')" class="text-xs bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:opacity-90 py-1.5 px-2.5 rounded-xl font-bold transition flex items-center">
+                                <i class="fa-solid fa-camera ml-1"></i> تحليل بالصورة
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Breakfast custom items list -->
+                    <div id="breakfast-custom-list" class="mt-3 space-y-2"></div>
+                </div>
+
+                <!-- Lunch Card -->
+                <div class="bg-white rounded-3xl p-5 shadow-sm border border-emerald-100 relative overflow-hidden">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-xs font-black bg-blue-50 text-blue-700 py-1.5 px-3 rounded-xl flex items-center">
+                            <i class="fa-solid fa-utensils ml-1.5"></i> وجبة الغداء المتكاملة
+                        </span>
+                        <span id="lunch-cal" class="text-sm font-bold text-gray-600">650 سعرة</span>
+                    </div>
+                    <p id="lunch-desc" class="text-sm text-gray-600 font-semibold mb-3 leading-relaxed">صدر دجاج مشوي (150 جم) مع 6 ملاعق رز بسمتي مسلوق، وطبق سلطة خضراء مشكلة مضافاً إليها ملعقة صغيرة من زيت الزيتون اللذيذ.</p>
+                    <div class="border-t border-dashed border-gray-100 pt-3 flex justify-between items-center">
+                        <span class="text-[10px] text-emerald-600 font-bold"><i class="fa-solid fa-dumbbell ml-1"></i> إمداد عضلي وتوليد حراري TEF</span>
+                        <div class="flex space-x-1 space-x-reverse">
+                            <button onclick="openAddSnackModal('lunch')" class="text-xs bg-emerald-50 text-emerald-700 hover:bg-emerald-100 py-1.5 px-2.5 rounded-xl font-bold transition">
+                                <i class="fa-solid fa-plus ml-1"></i> أضف مكونات
+                            </button>
+                            <button onclick="openVisionAIModal('lunch')" class="text-xs bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:opacity-90 py-1.5 px-2.5 rounded-xl font-bold transition flex items-center">
+                                <i class="fa-solid fa-camera ml-1"></i> تحليل بالصورة
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Lunch custom items list -->
+                    <div id="lunch-custom-list" class="mt-3 space-y-2"></div>
+                </div>
+
+                <!-- Dinner Card -->
+                <div class="bg-white rounded-3xl p-5 shadow-sm border border-emerald-100 relative overflow-hidden">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-xs font-black bg-indigo-50 text-indigo-700 py-1.5 px-3 rounded-xl flex items-center">
+                            <i class="fa-solid fa-moon ml-1.5"></i> وجبة العشاء الخفيفة
+                        </span>
+                        <span id="dinner-cal" class="text-sm font-bold text-gray-600">400 سعرة</span>
+                    </div>
+                    <p id="dinner-desc" class="text-sm text-gray-600 font-semibold mb-3 leading-relaxed">علبة زبادي يوناني غني بالبروتين، مع ملعقة صغيرة من عسل النحل الطبيعي، وحفنة صغيرة من اللوز النيئ لحرق دهون أفضل ليلاً.</p>
+                    <div class="border-t border-dashed border-gray-100 pt-3 flex justify-between items-center">
+                        <span class="text-[10px] text-emerald-600 font-bold"><i class="fa-solid fa-bed ml-1"></i> عشاء بطيء الامتصاص (كازين طبيعي)</span>
+                        <div class="flex space-x-1 space-x-reverse">
+                            <button onclick="openAddSnackModal('dinner')" class="text-xs bg-emerald-50 text-emerald-700 hover:bg-emerald-100 py-1.5 px-2.5 rounded-xl font-bold transition">
+                                <i class="fa-solid fa-plus ml-1"></i> أضف مكونات
+                            </button>
+                            <button onclick="openVisionAIModal('dinner')" class="text-xs bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:opacity-90 py-1.5 px-2.5 rounded-xl font-bold transition flex items-center">
+                                <i class="fa-solid fa-camera ml-1"></i> تحليل بالصورة
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Dinner custom items list -->
+                    <div id="dinner-custom-list" class="mt-3 space-y-2"></div>
+                </div>
+
+                <!-- Snacks Card -->
+                <div class="bg-white rounded-3xl p-5 shadow-sm border border-emerald-100">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-xs font-black bg-rose-50 text-rose-700 py-1.5 px-3 rounded-xl flex items-center">
+                            <i class="fa-solid fa-cookie-bite ml-1.5"></i> السناكات والوجبات الإضافية
+                        </span>
+                    </div>
+                    <div id="snacks-list-container" class="space-y-2 mb-4">
+                        <p id="empty-snacks-msg" class="text-xs text-gray-400 text-center py-2">لم تضف سناكات اليوم. يمكنك التقاط صورة للسناك أو كتابته يدوياً.</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="openAddSnackModal('snack')" class="py-3 bg-gray-50 hover:bg-emerald-50 border border-dashed border-gray-200 hover:border-emerald-300 text-gray-600 hover:text-emerald-700 rounded-2xl font-bold text-xs transition duration-150 flex items-center justify-center space-x-2 space-x-reverse">
+                            <i class="fa-solid fa-keyboard text-sm"></i>
+                            <span>كتابة سناك يدوياً</span>
+                        </button>
+                        <button onclick="openVisionAIModal('snack')" class="py-3 bg-gradient-to-r from-emerald-600 to-teal-700 hover:opacity-90 text-white rounded-2xl font-bold text-xs transition duration-150 flex items-center justify-center space-x-2 space-x-reverse">
+                            <i class="fa-solid fa-camera text-sm"></i>
+                            <span>سكانر السناك بالذكاء</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 3: AI CHATBOT ================= -->
+        <section id="tab-chat" class="tab-content hidden h-[68vh] flex flex-col justify-between">
+            <div class="bg-white rounded-t-3xl p-4 shadow-sm border border-emerald-100 flex items-center space-x-3 space-x-reverse">
+                <div class="relative">
+                    <div class="bg-emerald-100 p-2.5 rounded-full text-emerald-700 text-xl w-12 h-12 flex items-center justify-center shadow-inner">
+                        <i class="fa-solid fa-user-md"></i>
+                    </div>
+                    <span class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"></span>
+                </div>
+                <div>
+                    <h3 class="text-sm font-black text-gray-800">أ. أسماء (أخصائية التغذية العلاجية بالـ AI)</h3>
+                    <p class="text-[10px] text-emerald-600 font-extrabold flex items-center">
+                        <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full ml-1 animate-ping"></span> طبي وعلمي نشط الآن
+                    </p>
+                </div>
+            </div>
+
+            <!-- Chat Message Window -->
+            <div id="chat-messages" class="flex-grow bg-white border-x border-emerald-100 overflow-y-auto p-4 space-y-4 no-scrollbar">
+                <!-- Welcome Bot message -->
+                <div class="flex items-start space-x-2 space-x-reverse max-w-[90%]">
+                    <div class="bg-emerald-100 text-emerald-800 p-2 rounded-full text-xs self-start">
+                        <i class="fa-solid fa-user-md"></i>
+                    </div>
+                    <div class="bg-emerald-50 rounded-2xl p-3.5 text-xs text-gray-700 shadow-sm leading-relaxed rounded-tr-none">
+                        أهلاً بك في عيادتي الذكية 🩺. أنا أخصائية التغذية والتمثيل الغذائي. نظامي البرمجي مُدعم بأحدث الأبحاث العلمية من الجمعية الأمريكية للتغذية (ASN). 
+                        <br><br>
+                        سواء كنت تعاني من <b>ثبات الوزن</b>، أو ترغب في فهم <b>مقاومة الأنسولين</b>، أو تبحث عن <b>بدائل صحية غنية بالبروتين</b>، سأجيبك بأدلة علمية مبسطة وعملية. كيف يمكنني دعم خطتك اليوم؟
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pre-defined Scientific Questions buttons -->
+            <div class="bg-gray-50 p-2 border-x border-t border-emerald-100 flex space-x-1.5 space-x-reverse overflow-x-auto no-scrollbar">
+                <button onclick="sendQuickQuestion('ما هي النصيحة الطبية للتخلص من ثبات الوزن؟')" class="bg-white hover:bg-emerald-50 border border-emerald-100 text-emerald-800 text-[10px] py-1.5 px-3 rounded-full font-bold whitespace-nowrap transition">
+                     علاج ثبات الوزن 📉
+                </button>
+                <button onclick="sendQuickQuestion('كيف أوزع الماكروز علمياً لزيادة العضلات؟')" class="bg-white hover:bg-emerald-50 border border-emerald-100 text-emerald-800 text-[10px] py-1.5 px-3 rounded-full font-bold whitespace-nowrap transition">
+                     الماكروز والعضلات 💪
+                </button>
+                <button onclick="sendQuickQuestion('كيف تؤثر السناكات المكررة على مقاومة الأنسولين؟')" class="bg-white hover:bg-emerald-50 border border-emerald-100 text-emerald-800 text-[10px] py-1.5 px-3 rounded-full font-bold whitespace-nowrap transition">
+                     مقاومة الأنسولين 🩸
+                </button>
+                <button onclick="sendQuickQuestion('كيف أتخلص من الجوع الليلي الشديد؟')" class="bg-white hover:bg-emerald-50 border border-emerald-100 text-emerald-800 text-[10px] py-1.5 px-3 rounded-full font-bold whitespace-nowrap transition">
+                     كبح الجوع الليلي 🌙
+                </button>
+            </div>
+
+            <!-- Chat Input Area -->
+            <div class="bg-white p-3 rounded-b-3xl border-t border-gray-100 shadow-inner flex items-center space-x-2 space-x-reverse">
+                <input type="text" id="chat-input" placeholder="اسألني أي سؤال علمي أو طبي عن صحتك وجسدك..." class="flex-grow p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-xs" onkeypress="handleChatEnter(event)">
+                <button onclick="sendChatMessage()" class="bg-emerald-600 text-white p-3 rounded-xl hover:bg-emerald-700 transition w-11 h-11 flex items-center justify-center shadow-md shadow-emerald-100">
+                    <i class="fa-solid fa-paper-plane text-md"></i>
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- ================= ADD SNACK MODAL ================= -->
+    <div id="snack-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl relative animate-in fade-in duration-200">
+            <button onclick="closeAddSnackModal()" class="absolute top-4 left-4 text-gray-400 hover:text-gray-600 bg-gray-100 p-1.5 rounded-full w-8 h-8 flex items-center justify-center">
+                <i class="fa-solid fa-times"></i>
+            </button>
+            <h3 class="text-lg font-black text-emerald-800 mb-1 flex items-center">
+                <i class="fa-solid fa-keyboard ml-2 text-emerald-600"></i> إضافة مكون يدوياً
+            </h3>
+            <p class="text-[11px] text-gray-500 mb-4">أدخل اسم الطعام والسعرات التقديرية بدقة لليوم المختار.</p>
+
+            <div class="space-y-4">
+                <input type="hidden" id="modal-meal-type">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">اسم الوجبة / السناك</label>
+                    <input type="text" id="modal-snack-name" placeholder="مثال: 3 تمرات، موزة، 50 جرام رز، مكسرات" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-xs">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">السعرات الحرارية المقدرة (سعرة)</label>
+                    <input type="number" id="modal-snack-calories" placeholder="مثال: 120" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-black text-center">
+                </div>
+                <button onclick="saveAddedSnack()" class="w-full py-3.5 bg-emerald-600 text-white rounded-xl font-bold text-xs hover:bg-emerald-700 transition flex items-center justify-center space-x-2 space-x-reverse">
+                    <i class="fa-solid fa-plus-circle"></i>
+                    <span>إدراج المكون وتحديث السعرات</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODERN AI VISION & PHOTO ANALYSIS MODAL ================= -->
+    <div id="vision-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 hidden backdrop-blur-md">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-200">
+            <!-- Close btn -->
+            <button onclick="closeVisionAIModal()" class="absolute top-4 left-4 text-gray-400 hover:text-gray-600 bg-gray-100 p-1.5 rounded-full w-8 h-8 flex items-center justify-center z-10">
+                <i class="fa-solid fa-times"></i>
+            </button>
+
+            <h3 class="text-base font-black text-emerald-800 mb-1 flex items-center">
+                <i class="fa-solid fa-camera ml-2 text-emerald-600 animate-pulse"></i> مختبر المسح البصري للوجبات بالـ AI
+            </h3>
+            <p class="text-[10px] text-gray-500 mb-4">التقط صورة للطبق أو حددها من الألبوم وسيقوم الذكاء الاصطناعي بتحليل المكونات وموازنة سعراتها بدقة.</p>
+
+            <input type="hidden" id="vision-meal-type">
+
+            <div class="space-y-4">
+                <!-- Drag and drop zone / Upload Button -->
+                <div id="upload-zone" class="border-2 border-dashed border-emerald-300 rounded-2xl p-6 text-center hover:bg-emerald-50/50 transition cursor-pointer relative" onclick="triggerFileInput()">
+                    <input type="file" id="vision-file-input" accept="image/*" class="hidden" onchange="handleImageSelection(event)">
+                    <div class="space-y-2">
+                        <div class="text-emerald-600 text-3xl">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                        </div>
+                        <p class="text-xs font-bold text-gray-700">اضغط هنا لالتقاط صورة للوجبة أو رفعها</p>
+                        <p class="text-[10px] text-gray-400">يدعم صيغ JPG, PNG مع ميزة المسح التلقائي للأوزان</p>
+                    </div>
+                </div>
+
+                <!-- Live Image Preview and Laser Scan Container -->
+                <div id="preview-container" class="relative rounded-2xl overflow-hidden hidden h-48 bg-gray-900 border border-gray-800">
+                    <img id="vision-preview-img" class="w-full h-full object-cover opacity-80">
+                    <!-- Scanning laser bar -->
+                    <div id="laser-bar" class="absolute left-0 right-0 h-1 bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,1)] scan-line hidden"></div>
+                    <div id="scanning-label" class="absolute inset-0 flex items-center justify-center bg-black/40 text-emerald-300 text-xs font-black hidden">
+                        <span class="animate-pulse flex items-center"><i class="fa-solid fa-spinner animate-spin ml-2"></i> جاري استخلاص السعرات والماكروز علمياً...</span>
+                    </div>
+                </div>
+
+                <!-- Common Healthy Food quick presets helper (For simulated high intelligence) -->
+                <div id="preset-selector" class="space-y-1">
+                    <label class="block text-[10px] font-bold text-gray-500">اختر نوع طبقك التقريبي للمطابقة (لتسريع الذكاء الاصطناعي):</label>
+                    <select id="food-preset" class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                        <option value="kabsa">كبسة دجاج ورز بسمتي مع سلطة</option>
+                        <option value="meat_potato">ستيك لحم بقري مشوي مع بطاطس حلوة مفرومة</option>
+                        <option value="oatmeal">شوفان بالحليب والموز وعسل النحل العضوي</option>
+                        <option value="eggs">أومليت بيضتان مع جبن قريش وزيتون</option>
+                        <option value="salad_tuna">سلطة يونانية خضراء مع تونة بالليمون</option>
+                        <option value="apple_nuts">تفاحة خضراء مقطعة مع قبضة لوز نيئ</option>
+                    </select>
+                </div>
+
+                <!-- Analysis Results Box -->
+                <div id="vision-analysis-results" class="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 rounded-2xl p-4 hidden">
+                    <h4 class="text-xs font-black text-emerald-950 mb-2 border-b border-emerald-100 pb-1.5 flex items-center">
+                        <i class="fa-solid fa-circle-check text-emerald-600 ml-1.5"></i> تم الكشف عن المكونات الطازجة:
+                    </h4>
+                    
+                    <div class="space-y-1.5 mb-3 text-[11px] text-gray-700" id="detected-components-list">
+                        <!-- Dynamic items -->
+                    </div>
+
+                    <div class="grid grid-cols-4 gap-1 text-center border-t border-dashed border-emerald-200 pt-3">
+                        <div class="bg-white p-1.5 rounded-lg border border-emerald-100">
+                            <span class="text-[9px] text-gray-400 block font-bold">السعرات</span>
+                            <span id="vision-res-cal" class="text-xs font-black text-emerald-800">--</span>
+                        </div>
+                        <div class="bg-white p-1.5 rounded-lg border border-emerald-100">
+                            <span class="text-[9px] text-gray-400 block font-bold">بروتين</span>
+                            <span id="vision-res-prot" class="text-xs font-black text-emerald-800">--</span>
+                        </div>
+                        <div class="bg-white p-1.5 rounded-lg border border-emerald-100">
+                            <span class="text-[9px] text-gray-400 block font-bold">كارب</span>
+                            <span id="vision-res-carb" class="text-xs font-black text-emerald-800">--</span>
+                        </div>
+                        <div class="bg-white p-1.5 rounded-lg border border-emerald-100">
+                            <span class="text-[9px] text-gray-400 block font-bold">دهون</span>
+                            <span id="vision-res-fat" class="text-xs font-black text-emerald-800">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex space-x-2 space-x-reverse">
+                    <button id="btn-run-vision" onclick="simulateAIVisionAnalysis()" class="flex-grow py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-xl text-xs transition flex items-center justify-center space-x-2 space-x-reverse">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        <span>تحليل الصورة بالـ AI ✨</span>
+                    </button>
+                    <button id="btn-approve-vision" onclick="approveVisionMeal()" class="flex-grow py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-extrabold rounded-xl text-xs transition hidden items-center justify-center space-x-2 space-x-reverse">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <span>اعتماد وإضافة للوجبة 🚀</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation Bar (Mobile Native App Look) -->
+    <nav class="bg-white/95 backdrop-blur-md border-t border-gray-100 py-3.5 px-6 shadow-2xl fixed bottom-0 left-0 right-0 z-50 rounded-t-3xl">
+        <div class="flex justify-around items-center max-w-md mx-auto">
+            <!-- Nav Item 1: Calculator/Profile -->
+            <button onclick="switchTab('profile')" id="nav-profile" class="flex flex-col items-center space-y-1 text-emerald-600">
+                <i class="fa-solid fa-address-card text-xl"></i>
+                <span class="text-[10px] font-extrabold">القياسات والأهداف</span>
+            </button>
+
+            <!-- Nav Item 2: Meals/Tracker -->
+            <button onclick="switchTab('meals')" id="nav-meals" class="flex flex-col items-center space-y-1 text-gray-400 hover:text-emerald-500">
+                <i class="fa-solid fa-calendar-days text-xl"></i>
+                <span class="text-[10px] font-extrabold">المفكرة والوجبات</span>
+            </button>
+
+            <!-- Nav Item 3: Chatbot AI -->
+            <button onclick="switchTab('chat')" id="nav-chat" class="flex flex-col items-center space-y-1 text-gray-400 hover:text-emerald-500 relative">
+                <i class="fa-solid fa-user-md text-xl"></i>
+                <span class="text-[10px] font-extrabold">الأخصائية الطبية</span>
+                <!-- Chat Notification dot -->
+                <span class="absolute top-0 right-2 w-2.5 h-2.5 bg-rose-500 rounded-full border border-white"></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Global State
+        let userData = {
+            gender: 'male',
+            age: 25,
+            weight: 75,
+            height: 170,
+            activity: 1.55,
+            goal: 'lose',
+            targetCalories: 2000,
+            calculated: false
+        };
+
+        // Custom extra foods added by day (7 days, Sat-Fri: 0 to 6)
+        let customMealsByDay = {
+            0: { breakfast: [], lunch: [], dinner: [], snack: [] },
+            1: { breakfast: [], lunch: [], dinner: [], snack: [] },
+            2: { breakfast: [], lunch: [], dinner: [], snack: [] },
+            3: { breakfast: [], lunch: [], dinner: [], snack: [] },
+            4: { breakfast: [], lunch: [], dinner: [], snack: [] },
+            5: { breakfast: [], lunch: [], dinner: [], snack: [] },
+            6: { breakfast: [], lunch: [], dinner: [], snack: [] }
+        };
+
+        let currentActiveDay = 0; // Saturday by default
+
+        // Standard Baseline suggestions by calorie range
+        const baseMealPlans = {
+            low: { // ~1200-1500 cal
+                breakfast: { desc: "بيضة مسلوقة، مع ربع رغيف خبز بر، وشرائح خيار وطماطم طازجة، ونصف علبة زبادي قليل الدسم.", cal: 280 },
+                lunch: { desc: "صدر دجاج مشوي بدون جلد (120 جم)، مع 4 ملاعق كبيرة أرز مسلوق، وطبق سلطة خضراء بليمون.", cal: 420 },
+                dinner: { desc: "علبة تونة مغسولة بالماء والخل (100 جم)، مع شريحة توست بر وحبات جرجير نضرة.", cal: 320 }
+            },
+            medium: { // ~1600-2100 cal
+                breakfast: { desc: "شريحتين توست بر مع جبنة بيضاء قليلة الدسم، بيضة مسلوقة، مع كوب شاي أو قهوة بدون سكر ورشة خيار وطماطم طازجة.", cal: 350 },
+                lunch: { desc: "صدر دجاج مشوي (150 جم) مع 6 ملاعق رز بسمتي مسلوق، وطبق سلطة خضراء مشكلة مضافاً إليها ملعقة صغيرة من زيت الزيتون اللذيذ.", cal: 650 },
+                dinner: { desc: "علبة زبادي يوناني غني بالبروتين، مع ملعقة صغيرة من عسل النحل الطبيعي، وحفنة صغيرة من اللوز النيئ لحرق دهون أفضل ليلاً.", cal: 400 }
+            },
+            high: { // ~2200+ cal
+                breakfast: { desc: "أومليت من 3 بيضات مخفوقة مع السبانخ، ورغيف خبز بر كامل، ونصف حبة أفوكادو صغيرة، مع كوب حليب دافئ.", cal: 550 },
+                lunch: { desc: "شريحة لحم ستيك بقري أو سلمون مشوي (180 جم)، مع بطاطس حلوة مشوية (150 جم)، وطبق بروكلي وسوتيه بالثوم وزيت الزيتون.", cal: 850 },
+                dinner: { desc: "كوب ونصف جبنة قريش صحية، مع شرائح التفاح، وملعقة زبدة الفول السوداني الطبيعية، وشريحة توست شوفان.", cal: 500 }
+            }
+        };
+
+        // Scientific preset databases for the AI Scanner simulator
+        const presetDatabases = {
+            kabsa: {
+                name: "كبسة دجاج منزلية معدلة صحياً ورز",
+                cal: 580, prot: 42, carbs: 68, fat: 12,
+                items: [
+                    "🍗 صدر دجاج منزوع الجلد ومطهو بالفرن (160 جم) - 260 سعرة",
+                    "🍚 رز بسمتي مغسول ومسلوق بقليل من الملح (150 جم) - 210 سعرة",
+                    "🥗 سلطة خضراء جانبية (طماطم، خيار، بقدونس) - 30 سعرة",
+                    "🥄 زيت نباتي للطهي خفيف (1 ملعقة صغيرة) - 80 سعرة"
+                ]
+            },
+            meat_potato: {
+                name: "ستيك لحم بقري قليل الدهون مع بطاطا مشوية",
+                cal: 620, prot: 48, carbs: 45, fat: 18,
+                items: [
+                    "🥩 ستيك لحم بقري فيليه مشوي (150 جم) - 340 سعرة",
+                    "🍠 بطاطس حلوة مخبوزة بالفرن متبلة (120 جم) - 130 سعرة",
+                    "🥦 زهرات بروكلي مسلوقة على البخار (100 جم) - 350 سعرة",
+                    "🫒 زيت زيتون بكر ممتاز للتحمير (1 ملعقة صغيرة) - 115 سعرة"
+                ]
+            },
+            oatmeal: {
+                name: "شوفان صحي بحليب اللوز والعسل والموز",
+                cal: 395, prot: 14, carbs: 65, fat: 8,
+                items: [
+                    "🌾 رقائق شوفان كاملة الحبة (50 جم) - 190 سعرة",
+                    "🥛 حليب اللوز غير المحلى (200 مل) - 35 سعرة",
+                    "🍌 موز طازج مفروم (1 حبة متوسطة) - 105 سعرة",
+                    "🍯 عسل نحل صافي طبيعي (1 ملعقة صغيرة) - 65 سعرة"
+                ]
+            },
+            eggs: {
+                name: "أومليت بيض مشبع بالجبن القريش والخضار",
+                cal: 310, prot: 24, carbs: 8, fat: 20,
+                items: [
+                    "🥚 بيضتان كاملتان طازجتان - 140 سعرة",
+                    "🧀 جبن قريش أبيض منزوع الدسم (80 جم) - 80 سعرة",
+                    "🫑 فلفل رومي وبصل مفروم مع البيض - 20 سعرة",
+                    "🫒 مكعبات زيتون أسود (5 حبات) - 70 سعرة"
+                ]
+            },
+            salad_tuna: {
+                name: "سلطة يونانية بالجرجير مع تونة بالماء",
+                cal: 290, prot: 32, carbs: 12, fat: 10,
+                items: [
+                    "🐟 لحم تونة معبأ بالماء ومصفى (130 جم) - 140 سعرة",
+                    "🥬 سلطة خضراء (جرجير، خس، خيار، طماطم) - 35 سعرة",
+                    "🥄 ملعقة زيت زيتون بكر طبيعي - 90 سعرة",
+                    "🧀 مكعبات جبنة فيتا قليلة الدسم (20 جم) - 25 سعرة"
+                ]
+            },
+            apple_nuts: {
+                name: "تفاحة خضراء مع حفنة مكسرات نية",
+                cal: 240, prot: 5, carbs: 25, fat: 15,
+                items: [
+                    "🍏 تفاحة خضراء كاملة بالقشر - 80 سعرة",
+                    "🥜 لوز وكاجو نيء غير مملح (12 حبة) - 160 سعرة"
+                ]
+            }
+        };
+
+        const dayNames = ["السبت", "الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"];
+
+        // Init App on load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadSavedData();
+            updateAllUI();
+        });
+
+        // Load data from LocalStorage
+        function loadSavedData() {
+            const savedUser = localStorage.getItem('rashaqati_user_v2');
+            if (savedUser) {
+                userData = JSON.parse(savedUser);
+                // Fill form elements
+                document.getElementById('age').value = userData.age;
+                document.getElementById('weight').value = userData.weight;
+                document.getElementById('height').value = userData.height;
+                document.getElementById('activity').value = userData.activity;
+                document.getElementById('goal').value = userData.goal;
+                const genderInputs = document.querySelectorAll('input[name="gender"]');
+                genderInputs.forEach(input => {
+                    if (input.value === userData.gender) input.checked = true;
+                });
+            }
+            const savedMeals = localStorage.getItem('rashaqati_meals_v2');
+            if (savedMeals) {
+                customMealsByDay = JSON.parse(savedMeals);
+            }
+        }
+
+        // Save data to LocalStorage
+        function saveData() {
+            localStorage.setItem('rashaqati_user_v2', JSON.stringify(userData));
+            localStorage.setItem('rashaqati_meals_v2', JSON.stringify(customMealsByDay));
+        }
+
+        // Switch bottom tabs
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            const navItems = {
+                profile: document.getElementById('nav-profile'),
+                meals: document.getElementById('nav-meals'),
+                chat: document.getElementById('nav-chat')
+            };
+
+            Object.keys(navItems).forEach(key => {
+                if (key === tabId) {
+                    navItems[key].className = "flex flex-col items-center space-y-1 text-emerald-600";
+                } else {
+                    navItems[key].className = "flex flex-col items-center space-y-1 text-gray-400 hover:text-emerald-500";
+                }
+            });
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Calculate calories and medical stats based on user input
+        function calculateDiet(event) {
+            event.preventDefault();
+
+            const gender = document.querySelector('input[name="gender"]:checked').value;
+            const age = parseInt(document.getElementById('age').value);
+            const weight = parseFloat(document.getElementById('weight').value);
+            const height = parseFloat(document.getElementById('height').value);
+            const activity = parseFloat(document.getElementById('activity').value);
+            const goal = document.getElementById('goal').value;
+
+            // BMR Calculation using Mifflin-St Jeor formula
+            let bmr = 0;
+            if (gender === 'male') {
+                bmr = (10 * weight) + (6.25 * height) - (5 * age) + 5;
+            } else {
+                bmr = (10 * weight) + (6.25 * height) - (5 * age) - 161;
+            }
+
+            // TDEE
+            let tdee = bmr * activity;
+
+            // Goal adjustment
+            let targetCalories = tdee;
+            if (goal === 'lose') {
+                targetCalories = tdee - 500; // Caloric deficit of 500
+                if (targetCalories < 1200) targetCalories = 1200; // Safe absolute baseline
+            } else if (goal === 'gain') {
+                targetCalories = tdee + 350; // Lean surplus of 350
+            }
+
+            targetCalories = Math.round(targetCalories);
+
+            // Water Intake estimation: 35ml per kg of weight
+            const waterIntake = (weight * 0.035).toFixed(1);
+
+            // BMI Calculation: Weight (kg) / Height^2 (m)
+            const heightInMeters = height / 100;
+            const bmi = (weight / (heightInMeters * heightInMeters)).toFixed(1);
+
+            let bmiStatus = "";
+            if (bmi < 18.5) bmiStatus = "نحافة طبية";
+            else if (bmi < 24.9) bmiStatus = "وزن مثالي آمن";
+            else if (bmi < 29.9) bmiStatus = "زيادة وزن معتدلة";
+            else bmiStatus = "سمنة - تتطلب حذر";
+
+            // Save to State
+            userData = {
+                gender,
+                age,
+                weight,
+                height,
+                activity,
+                goal,
+                targetCalories,
+                bmi,
+                bmiStatus,
+                waterIntake,
+                calculated: true
+            };
+            saveData();
+
+            updateAllUI();
+
+            const resultsCard = document.getElementById('results-card');
+            resultsCard.classList.remove('hidden');
+            resultsCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Dynamic update of all UI values
+        function updateAllUI() {
+            const target = userData.targetCalories;
+
+            // Header Calorie Badge
+            const badge = document.getElementById('calorie-badge');
+            if (userData.calculated) {
+                badge.classList.remove('hidden');
+            }
+
+            // Calculations Display
+            document.getElementById('target-calories-display').innerText = target;
+            document.getElementById('target-calories-text').innerText = target;
+
+            // Update BMI and Water
+            if (userData.calculated) {
+                document.getElementById('result-bmi').innerText = userData.bmi;
+                document.getElementById('result-bmi-status').innerText = userData.bmiStatus;
+                document.getElementById('result-water').innerText = `${userData.waterIntake} لتر / يومياً`;
+            }
+
+            // Macros Allocation based on the selected Goal
+            let pPct = 0.30, cPct = 0.45, fPct = 0.25; // Default Balanced
+            if (userData.goal === 'lose') {
+                pPct = 0.35; cPct = 0.35; fPct = 0.30; // High Protein Cutting
+            } else if (userData.goal === 'gain') {
+                pPct = 0.28; cPct = 0.52; fPct = 0.20; // High Carb Bulking
+            }
+
+            const proteinGrams = Math.round((target * pPct) / 4);
+            const carbsGrams = Math.round((target * cPct) / 4);
+            const fatsGrams = Math.round((target * fPct) / 9);
+
+            document.getElementById('macro-protein').innerText = `${proteinGrams} جم`;
+            document.getElementById('macro-protein-pct').innerText = `${Math.round(pPct*100)}%`;
+            document.getElementById('macro-carbs').innerText = `${carbsGrams} جم`;
+            document.getElementById('macro-carbs-pct').innerText = `${Math.round(cPct*100)}%`;
+            document.getElementById('macro-fats').innerText = `${fatsGrams} جم`;
+            document.getElementById('macro-fats-pct').innerText = `${Math.round(fPct*100)}%`;
+
+            if (userData.calculated) {
+                document.getElementById('results-card').classList.remove('hidden');
+            }
+
+            renderMealsForDay();
+        }
+
+        // Day select handler
+        function selectDay(dayIndex) {
+            currentActiveDay = dayIndex;
+
+            document.querySelectorAll('.day-tab').forEach((btn, idx) => {
+                if (idx === dayIndex) {
+                    btn.className = "day-tab px-4 py-2.5 rounded-xl text-sm font-extrabold transition duration-150 whitespace-nowrap bg-emerald-600 text-white shadow-md";
+                } else {
+                    btn.className = "day-tab px-4 py-2.5 rounded-xl text-sm font-extrabold transition duration-150 whitespace-nowrap bg-white text-gray-500";
+                }
+            });
+
+            document.getElementById('current-day-title').innerText = dayNames[dayIndex];
+            renderMealsForDay();
+        }
+
+        // Render food recommendations and custom entries
+        function renderMealsForDay() {
+            const target = userData.targetCalories;
+            let planType = 'medium';
+
+            if (target < 1600) planType = 'low';
+            else if (target > 2150) planType = 'high';
+
+            const defaultPlan = baseMealPlans[planType];
+
+            // Set basic texts
+            document.getElementById('breakfast-desc').innerText = defaultPlan.breakfast.desc;
+            document.getElementById('breakfast-cal').innerText = `${defaultPlan.breakfast.cal} سعرة`;
+
+            document.getElementById('lunch-desc').innerText = defaultPlan.lunch.desc;
+            document.getElementById('lunch-cal').innerText = `${defaultPlan.lunch.cal} سعرة`;
+
+            document.getElementById('dinner-desc').innerText = defaultPlan.dinner.desc;
+            document.getElementById('dinner-cal').innerText = `${defaultPlan.dinner.cal} سعرة`;
+
+            // Calculate current total
+            let totalConsumed = defaultPlan.breakfast.cal + defaultPlan.lunch.cal + defaultPlan.dinner.cal;
+
+            const dayObj = customMealsByDay[currentActiveDay];
+
+            const renderCustomItems = (type, listId) => {
+                const listContainer = document.getElementById(listId);
+                listContainer.innerHTML = '';
+                const items = dayObj[type] || [];
+
+                items.forEach((item, index) => {
+                    totalConsumed += item.calories;
+                    const itemEl = document.createElement('div');
+                    itemEl.className = "flex justify-between items-center bg-emerald-50/50 p-2.5 rounded-xl border border-emerald-100 text-xs text-gray-700 animate-in fade-in";
+                    itemEl.innerHTML = `
+                        <div class="flex items-center space-x-2 space-x-reverse">
+                            <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold text-[9px]">تم المسح</span>
+                            <span class="font-bold text-emerald-950">${item.name}</span>
+                        </div>
+                        <div class="flex items-center space-x-2 space-x-reverse">
+                            <span class="font-bold text-emerald-800">+${item.calories} سعرة</span>
+                            <button onclick="removeSnack('${type}', ${index})" class="text-rose-500 hover:text-rose-700 p-1">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    `;
+                    listContainer.appendChild(itemEl);
+                });
+            };
+
+            // Render custom items
+            renderCustomItems('breakfast', 'breakfast-custom-list');
+            renderCustomItems('lunch', 'lunch-custom-list');
+            renderCustomItems('dinner', 'dinner-custom-list');
+
+            // Render Snacks
+            const snacksContainer = document.getElementById('snacks-list-container');
+            const emptyMsg = document.getElementById('empty-snacks-msg');
+            snacksContainer.innerHTML = ''; // Clear
+
+            const snacksList = dayObj.snack || [];
+            if (snacksList.length > 0) {
+                emptyMsg.classList.add('hidden');
+                snacksList.forEach((item, index) => {
+                    totalConsumed += item.calories;
+                    const snackEl = document.createElement('div');
+                    snackEl.className = "flex justify-between items-center bg-rose-50/50 p-3 rounded-xl border border-rose-100 text-xs text-gray-700";
+                    snackEl.innerHTML = `
+                        <div class="flex items-center space-x-2 space-x-reverse">
+                            <span class="bg-rose-100 text-rose-800 px-2 py-0.5 rounded-full font-bold text-[9px]">سناك</span>
+                            <span class="font-bold text-rose-950">${item.name}</span>
+                        </div>
+                        <div class="flex items-center space-x-2 space-x-reverse">
+                            <span class="font-bold text-rose-800">${item.calories} سعرة</span>
+                            <button onclick="removeSnack('snack', ${index})" class="text-rose-500 hover:text-rose-700 p-1">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    `;
+                    snacksContainer.appendChild(snackEl);
+                });
+            } else {
+                snacksContainer.appendChild(emptyMsg);
+                emptyMsg.classList.remove('hidden');
+            }
+
+            // Progress tracking updates
+            document.getElementById('consumed-calories').innerText = totalConsumed;
+            const progressPercent = Math.min((totalConsumed / target) * 100, 100);
+            const progressBar = document.getElementById('calorie-progress-bar');
+            progressBar.style.width = `${progressPercent}%`;
+
+            if (totalConsumed > target) {
+                progressBar.classList.remove('from-emerald-500', 'to-teal-500');
+                progressBar.classList.add('from-rose-500', 'to-red-500');
+                document.getElementById('calorie-warning').classList.remove('hidden');
+            } else {
+                progressBar.classList.add('from-emerald-500', 'to-teal-500');
+                progressBar.classList.remove('from-rose-500', 'to-red-500');
+                document.getElementById('calorie-warning').classList.add('hidden');
+            }
+
+            // Header Badge Calculation
+            const caloriesLeft = target - totalConsumed;
+            const badgeSpan = document.getElementById('badge-calories');
+            if (caloriesLeft > 0) {
+                badgeSpan.innerText = caloriesLeft;
+                document.getElementById('calorie-badge').className = "bg-emerald-800/80 backdrop-blur-md text-white text-xs py-1.5 px-3 rounded-full font-bold block border border-emerald-500/30";
+            } else {
+                badgeSpan.innerText = 0;
+                document.getElementById('calorie-badge').className = "bg-rose-800/80 backdrop-blur-md text-white text-xs py-1.5 px-3 rounded-full font-bold block border border-rose-500/30";
+            }
+        }
+
+        // Add Manual snack modals
+        function openAddSnackModal(mealType) {
+            document.getElementById('modal-meal-type').value = mealType;
+            document.getElementById('modal-snack-name').value = '';
+            document.getElementById('modal-snack-calories').value = '';
+            document.getElementById('snack-modal').classList.remove('hidden');
+        }
+
+        function closeAddSnackModal() {
+            document.getElementById('snack-modal').classList.add('hidden');
+        }
+
+        function saveAddedSnack() {
+            const mealType = document.getElementById('modal-meal-type').value;
+            const name = document.getElementById('modal-snack-name').value.trim();
+            const calories = parseInt(document.getElementById('modal-snack-calories').value);
+
+            if (!name || isNaN(calories) || calories < 0) {
+                alert('يرجى كتابة الحقول بشكل صحيح وسعرات موجبة علمياً!');
+                return;
+            }
+
+            customMealsByDay[currentActiveDay][mealType].push({ name, calories });
+            saveData();
+            closeAddSnackModal();
+            renderMealsForDay();
+        }
+
+        function removeSnack(mealType, index) {
+            customMealsByDay[currentActiveDay][mealType].splice(index, 1);
+            saveData();
+            renderMealsForDay();
+        }
+
+        // ================= NEW: MOCK AI VISION CONTROLLER =================
+        let loadedVisionData = null; // Store temp vision analysis results
+
+        function openVisionAIModal(mealType) {
+            document.getElementById('vision-meal-type').value = mealType;
+            document.getElementById('upload-zone').classList.remove('hidden');
+            document.getElementById('preview-container').classList.add('hidden');
+            document.getElementById('vision-analysis-results').classList.add('hidden');
+            document.getElementById('btn-approve-vision').classList.add('hidden');
+            document.getElementById('btn-run-vision').classList.remove('hidden');
+            document.getElementById('vision-file-input').value = ""; // Reset
+            loadedVisionData = null;
+            document.getElementById('vision-modal').classList.remove('hidden');
+        }
+
+        function closeVisionAIModal() {
+            document.getElementById('vision-modal').classList.add('hidden');
+        }
+
+        function triggerFileInput() {
+            document.getElementById('vision-file-input').click();
+        }
+
+        function handleImageSelection(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // Show Preview and hide upload box
+                const previewImg = document.getElementById('vision-preview-img');
+                previewImg.src = e.target.result;
+                document.getElementById('upload-zone').classList.add('hidden');
+                document.getElementById('preview-container').classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Simulation function of AI scanning/detecting foods
+        function simulateAIVisionAnalysis() {
+            const previewBox = document.getElementById('preview-container');
+            if (previewBox.classList.contains('hidden')) {
+                alert("يرجى التقاط أو رفع صورة الوجبة أولاً لبدء مسح الذكاء الاصطناعي!");
+                return;
+            }
+
+            const laser = document.getElementById('laser-bar');
+            const label = document.getElementById('scanning-label');
+            const runBtn = document.getElementById('btn-run-vision');
+
+            // Show scan animation elements
+            laser.classList.remove('hidden');
+            label.classList.remove('hidden');
+            runBtn.disabled = true;
+            runBtn.className = "flex-grow py-3 bg-gray-300 text-gray-500 font-extrabold rounded-xl text-xs cursor-not-allowed flex items-center justify-center space-x-2 space-x-reverse";
+
+            // AI Simulation wait of 2.5 seconds
+            setTimeout(() => {
+                laser.classList.add('hidden');
+                label.classList.add('hidden');
+                runBtn.classList.add('hidden'); // Hide run, show approve
+                
+                const approveBtn = document.getElementById('btn-approve-vision');
+                approveBtn.classList.remove('hidden');
+                approveBtn.className = "flex-grow py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-extrabold rounded-xl text-xs transition flex items-center justify-center space-x-2 space-x-reverse";
+
+                // Read selected food preset
+                const presetKey = document.getElementById('food-preset').value;
+                const data = presetDatabases[presetKey];
+                loadedVisionData = data;
+
+                // Render detected elements list
+                const listContainer = document.getElementById('detected-components-list');
+                listContainer.innerHTML = '';
+                
+                data.items.forEach(item => {
+                    const li = document.createElement('div');
+                    li.className = "bg-white p-1.5 rounded-lg border border-emerald-100 font-semibold text-emerald-950 flex items-center";
+                    li.innerText = item;
+                    listContainer.appendChild(li);
+                });
+
+                // Set numbers
+                document.getElementById('vision-res-cal').innerText = `${data.cal} سعرة`;
+                document.getElementById('vision-res-prot').innerText = `${data.prot} جم`;
+                document.getElementById('vision-res-carb').innerText = `${data.carbs} جم`;
+                document.getElementById('vision-res-fat').innerText = `${data.fat} جم`;
+
+                // Show Results Box
+                document.getElementById('vision-analysis-results').classList.remove('hidden');
+            }, 2500);
+        }
+
+        // Add the analyzed vision meal to the custom list
+        function approveVisionMeal() {
+            if (!loadedVisionData) return;
+
+            const mealType = document.getElementById('vision-meal-type').value;
+            const name = loadedVisionData.name;
+            const calories = loadedVisionData.cal;
+
+            customMealsByDay[currentActiveDay][mealType].push({ name, calories });
+            saveData();
+            closeVisionAIModal();
+            renderMealsForDay();
+            
+            alert(`✅ تم رصد وتحليل الوجبة بنجاح وإضافتها لـ ${dayNames[currentActiveDay]}`);
+        }
+
+        // ================= SCIENTIFIC AI CHATBOT (DR. ASMAA) =================
+        function handleChatEnter(event) {
+            if (event.key === 'Enter') {
+                sendChatMessage();
+            }
+        }
+
+        function sendQuickQuestion(questionText) {
+            renderMessage(questionText, 'user');
+            setTimeout(() => {
+                const response = generateAIResponse(questionText);
+                renderMessage(response, 'bot');
+            }, 800);
+        }
+
+        function sendChatMessage() {
+            const inputField = document.getElementById('chat-input');
+            const messageText = inputField.value.trim();
+            if (!messageText) return;
+
+            renderMessage(messageText, 'user');
+            inputField.value = '';
+
+            setTimeout(() => {
+                const response = generateAIResponse(messageText);
+                renderMessage(response, 'bot');
+            }, 800);
+        }
+
+        function renderMessage(text, sender) {
+            const chatWindow = document.getElementById('chat-messages');
+            const messageContainer = document.createElement('div');
+
+            if (sender === 'user') {
+                messageContainer.className = "flex items-start space-x-2 space-x-reverse max-w-[90%] mr-auto justify-end";
+                messageContainer.innerHTML = `
+                    <div class="bg-emerald-600 text-white rounded-2xl p-3.5 text-xs shadow-sm leading-relaxed rounded-tl-none">
+                        ${text}
+                    </div>
+                `;
+            } else {
+                messageContainer.className = "flex items-start space-x-2 space-x-reverse max-w-[90%] animate-in fade-in";
+                messageContainer.innerHTML = `
+                    <div class="bg-emerald-100 text-emerald-800 p-2.5 rounded-full text-xs self-start shadow-inner">
+                        <i class="fa-solid fa-user-md"></i>
+                    </div>
+                    <div class="bg-emerald-50 rounded-2xl p-3.5 text-xs text-gray-700 shadow-sm leading-relaxed rounded-tr-none border border-emerald-100">
+                        ${text}
+                    </div>
+                `;
+            }
+
+            chatWindow.appendChild(messageContainer);
+            chatWindow.scrollTo({ top: chatWindow.scrollHeight, behavior: 'smooth' });
+        }
+
+        // Scientific Rule-Based Dynamic Processor
+        function generateAIResponse(msg) {
+            const text = msg.toLowerCase();
+
+            if (text.includes("مرحبا") || text.includes("سلام") || text.includes("أهلاً") || text.includes("مرحب")) {
+                return "أهلاً بك عيادتي الطبية المفتوحة 🩺. كيف يمكنني مساعدتك علمياً اليوم؟ أخبرني عن التحديات التي تواجهك (ثبات الوزن، الجوع، حساب الماكروز) لأبسطها لك بالدليل العلمي والخطوات العملية.";
+            }
+
+            if (text.includes("ثبات الوزن") || text.includes("ثبات")) {
+                return "💡 <b>التحليل الطبي لثبات الوزن (Weight Plateau):</b><br>ثبات الوزن أمر طبيعي ميكانيكياً نتيجة لتكيف الجسم الأيضي (Adaptive Thermogenesis) حيث يقلل الجسم طاقته لملاءمة الوزن الجديد.<br><br>🔨 <b>الخطوات العلمية لكسر الثبات:</b><br>1. <b>تغيير تكرار السعرات:</b> كسر النظام بوجبة مفتوحة مدروسة لإعادة تنشيط هرمون اللبتين (هرمون الشبع).<br>2. <b>رفع كمية البروتين:</b> لزيادة التأثير الحراري للأغذية (TEF)، حيث يستهلك الجسم 30% من طاقة البروتين لهضمه فقط!<br>3. <b>مراقبة الملح والسوائل:</b> قد يكون الثبات مجرد احتباس سوائل ناتج عن ارتفاع هرمون الكورتيزول (الإجهاد).";
+            }
+
+            if (text.includes("الماكروز") || text.includes("ماكروز") || text.includes("عضلات")) {
+                return "💪 <b>ميكانيكية تخليق البروتين العضلي (MPS):</b><br>لبناء العضلات أو المحافظة عليها أثناء حرق الدهون، تحتاج إلى ما لا يقل عن $1.6 \text{ إلى } 2.2 \text{ جرام}$ من البروتين لكل كيلوجرام من وزنك اليومي.<br><br><b>أفضل توزيع للماكروز علمياً للتنشيف:</b><br>• <b>بروتين:</b> 35% (لبناء الألياف العضلية وتفعيل الشبع).<br>• <b>كربوهيدرات معقدة:</b> 35% (لتعبئة مخازن الجلايكوجين العضلية).<br>• <b>دهون صحية:</b> 30% (لتحفيز الهرمونات الذكورية والبنائية كالتستوستيرون).";
+            }
+
+            if (text.includes("أنسولين") || text.includes("مقاومة") || text.includes("مقاومة الأنسولين")) {
+                return "🩸 <b>التحليل الكيميائي لمقاومة الأنسولين:</b><br>تحدث مقاومة الأنسولين عندما تصبح خلايا الجسم (خاصة العضلية) غير حساسة للأنسولين، مما يجبر البنكرياس على ضخ المزيد، مما يمنع تحلل الدهون (Lipolysis) ويزيد تخزينها حول البطن.<br><br>💡 <b>العلاج الغذائي المعتمد:</b><br>1. <b>الصيام المتقطع (Intermittent Fasting):</b> لإعطاء خلايا الجسم فترات طويلة بدون انسولين لاستعادة الحساسية.<br>2. <b>تجنب النشويات البسيطة:</b> كالسكر والمخبوزات البيضاء التي تحدث طفرات حادة للانسولين.<br>3. <b>التمارين الرياضية:</b> تمارين المقاومة تفتح قنوات امتصاص الجلوكوز بالعضلات دون الحاجة للأنسولين!";
+            }
+
+            if (text.includes("الجوع") || text.includes("جوع") || text.includes("جعت")) {
+                return "🌙 <b>موازنة هرمونات الجوع (الغيلين واللبتين):</b><br>الشعور بالجوع الشديد ليلاً يرتبط غالباً بارتفاع هرمون الغيلين (الجوع) وانخفاض اللبتين (الشبع).<br><br>🛠️ <b>استراتيجية القضاء عليه:</b><br>• <b>هيدرات الجسم:</b> اشرب كوبين ماء دافئ، حيث يخلط الدماغ بين إشارة الجوع وإشارة العطش الخفيفة.<br>• <b>بروتين بطيء الامتصاص:</b> تناول كوب جبن قريش أو زبادي يوناني غني بكازين الحليب الذي يمد الجسم بالأحماض الأمينية ببطء لمدة تصل إلى 7 ساعات مما يمنع الجوع الصباحي ويحافظ على عضلاتك.";
+            }
+
+            if (text.includes("سعرة") || text.includes("سعرات") || text.includes("حساب")) {
+                return `بناءً على حساباتنا العلمية الدقيقة، يحتاج جسمك إلى هدف ثابت هو <b>${userData.targetCalories} سعرة يومياً</b> لتحقيق هدفك بأمان تام دون التسبب في هبوط معدلات الأيض أو خسارة الكتلة العضلية النضرة.`;
+            }
+
+            return "هذه نقطة علمية هامة جداً! أنصحك بالتركيز دوماً على جودة الأغذية الطبيعية (الأطعمة الكاملة Whole Foods) وتجنب الزيوت المهدرجة والمصنعة التي تسبب التهابات خلوية تعطل الحرق. هل تود تعديل وجبتك بالمسح البصري الآن لمتابعة خطتنا؟";
+        }
+    </script>
+</body>
+</html>
