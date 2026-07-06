@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منظومة إدارة محافظ المشاريع الكهربائية - الإصدار الذهبي</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- **NEW** ExcelJS Library for Professional Styling and Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap');
+        body { font-family: 'Cairo', sans-serif; }
+        html { scroll-behavior: smooth; }
+        .tab-btn-active { border-color: #312e81; color: #312e81; }
+        .tab-btn-inactive { border-color: transparent; color: #64748b; }
+        #editorArea:focus { background-color: #ffffff; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15); }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800">
+
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <header class="flex flex-col lg:flex-row justify-between items-center gap-6 mb-8 bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+            <div>
+                <h1 class="text-2xl lg:text-3xl font-extrabold text-indigo-950 flex items-center gap-3">
+                    <span class="text-amber-500 animate-pulse">⚡</span> منظومة إدارة محافظ المشاريع
+                </h1>
+                <p class="text-sm text-slate-500 mt-2 font-medium">قاعدة بيانات + إدارة وتسعير المشاريع + تصدير Excel احترافي</p>
+            </div>
+            <div class="flex flex-wrap gap-3 w-full lg:w-auto justify-end">
+                <button onclick="openAdminModal()" class="bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 rounded-2xl text-sm font-bold shadow-sm">⚙️ الأدمن</button>
+                <button onclick="exportData()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-2xl text-sm font-bold shadow-sm">📤 تصدير نسخة احتياطية</button>
+                <label class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-2xl text-sm font-bold shadow-sm cursor-pointer">
+                    📥 استيراد نسخة احتياطية
+                    <input type="file" id="importFile" onchange="importData(event)" class="hidden" accept=".json">
+                </label>
+            </div>
+        </header>
+
+        <div class="flex border-b border-slate-200 mb-8 gap-4">
+            <button id="tabMasterBtn" onclick="switchTab('master')" class="py-3 px-6 font-bold text-sm border-b-4 tab-btn-active">📚 قاعدة البنود (<span id="masterCount">0</span>)</button>
+            <button id="tabProjectsBtn" onclick="switchTab('projects')" class="py-3 px-6 font-bold text-sm border-b-4 tab-btn-inactive">🗂️ حافظة المشاريع (<span id="projectsCount">0</span>)</button>
+            <button id="tabPricingBtn" onclick="switchTab('pricing')" class="py-3 px-6 font-bold text-sm border-b-4 tab-btn-inactive hidden">📋 تسعير المشروع الحالي</button>
+        </div>
+
+        <div id="tabMasterContent">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-3xl shadow-sm border h-fit sticky top-6">
+                    <h2 id="formTitle" class="text-lg font-bold text-slate-900 mb-6">📝 إضافة/تعديل بند مرجعي</h2>
+                    <form id="itemForm" onsubmit="saveMasterItem(event)" class="space-y-5">
+                        <input type="hidden" id="itemId">
+                        <div><label class="block text-xs font-bold text-slate-500 mb-2">القسم الفني</label><select id="itemCategory" class="w-full p-3 bg-slate-50 border rounded-xl text-sm" required></select></div>
+                        <div><label class="block text-xs font-bold text-slate-500 mb-2">الصياغة الفنية</label><textarea id="itemDescription" rows="5" class="w-full p-3 bg-slate-50 border rounded-xl text-sm" placeholder="اكتب وصف البند..." required></textarea></div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="block text-xs font-bold text-slate-500 mb-2">وحدة القياس</label><input type="text" id="itemUnit" class="w-full p-3 bg-slate-50 border rounded-xl text-sm" placeholder="عدد، متر..." required></div>
+                            <div><label class="block text-xs font-bold text-slate-500 mb-2">السعر (ر.ق)</label><input type="number" step="0.01" id="itemPrice" class="w-full p-3 bg-slate-50 border rounded-xl text-sm" placeholder="0.00" required></div>
+                        </div>
+                        <div class="flex gap-2 pt-3"><button type="submit" class="flex-1 bg-indigo-950 hover:bg-black text-white py-3.5 rounded-2xl font-bold text-sm shadow-md">حفظ</button><button type="button" onclick="resetForm()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-5 py-3.5 rounded-2xl text-sm font-bold">إلغاء</button></div>
+                    </form>
+                </div>
+                <div class="lg:col-span-2 space-y-5">
+                    <div class="bg-white p-4 rounded-3xl shadow-sm border flex flex-col md:flex-row gap-3">
+                        <div class="relative flex-1"><span class="absolute inset-y-0 right-3 flex items-center text-slate-400">🔍</span><input type="text" id="searchQuery" oninput="renderMasterItems()" class="w-full pr-10 pl-4 py-3 bg-slate-50 border rounded-2xl text-sm" placeholder="ابحث..."></div>
+                        <select id="filterCategory" onchange="renderMasterItems()" class="p-3 bg-slate-50 border rounded-2xl text-sm font-semibold cursor-pointer"></select>
+                    </div>
+                    <div id="itemsContainer" class="space-y-4"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tabProjectsContent" class="hidden">
+             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="md:col-span-1">
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border h-fit sticky top-6">
+                        <h2 class="text-lg font-bold text-slate-900 mb-6">📂 إنشاء مشروع جديد</h2>
+                        <div class="space-y-4">
+                            <div><label class="block text-xs font-bold text-slate-500 mb-2">اسم المشروع</label><input type="text" id="newProjectName" class="w-full p-3 bg-slate-50 border rounded-xl text-sm" placeholder="مثال: مسجد م.س 555..."></div>
+                            <div><label class="block text-xs font-bold text-slate-500 mb-2">المنطقة</label><input type="text" id="newProjectArea" class="w-full p-3 bg-slate-50 border rounded-xl text-sm" placeholder="مثال: الدفنة، الوكرة..."></div>
+                            <button onclick="createNewProject()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-2xl font-bold text-sm shadow-md">إنشاء وتحميل</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="projectsListContainer" class="md:col-span-2 space-y-4"></div>
+            </div>
+        </div>
+        
+        <div id="tabPricingContent" class="hidden space-y-6"></div>
+    </div>
+
+    <div id="adminModalContainer" class="relative z-50"></div>
+    <div id="editorModalContainer" class="relative z-50"></div>
+
+    <script>
+        const masterItemsData = [{"id":1720365113945952,"category":"أعمال الكهرباء","description":"توريد وتركيب LV PANNEL 16 PLUG AND PLAY OUTGOING MCCB.S WITH MINIMUM TYPE OF SEPARATION 3B TYPE 2 WITH REMOVABLE MAIN ACB 1250 AMP with ARMS (arcflash reduction maintinance system ) with 65 KA PER SECONED SHORT CIRCUIT CAPACITY and shutter mechanism to increase the level of protection مع عمل كل متطلبات كهرماء قبل عملية القطع والوصل مثل تقديم دراسة لمنظومة حماية المحول REF مع اخذ موافقة كهرماء عليها وعلى درجة المقاول درجة اولى على الاحمال ورخصة من مخططات تصنيع اللوحة وتعهد من المصنع والمقاول درجة اولى ان التركيبات والتصنيع قد تمت وفق تعليمات كهرماء ","unit":"عدد","price":150000.0},{"id":1720365113946977,"category":"أعمال الصوتيات","description":"توريد وتركيب أنظمة نقل الصوت والصورة تشمل color PTZ camera hight resulution 52inch lcd monitor no. 2 , lcd monitor 32 inch no.1, and 95 inch active white boord promethean with it,s high quality vplcx150 sony projector , key board controller with joystick , component card for the camera . شاملة جميع التوصيلات والكوابل والترنكات اللازمة مع ما يلزم من av devices , transmitter , recievers and mtp twisters حسب تصميم الشركة المختصة حسب المواصفات واعتماد المهندس المختص ","unit":"عدد","price":80000.0},{"id":1720365113948002,"category":"أنظمة إنذار وإطفاء الحريق","description":"توريد وتركيب Multi- zones-addressable FACP With rechargable Battery Type مع جميع عناصر النظام والتمديدات اللازمة بواسطة شركة مختصة معتمدة من الدفاع المدني ومع جميع Smoke and Heat detectors وما يلزم للتشغيل علما ان البند يشمل جميع عناصر FIRE ALARM SYS المذكورة كالتالي: 1. كاشفات الحريق نوعية الدخانية (Smoke Detector - SD). 2. كاشفات الحريق نوعية الحرارية (Heat Detector - HD). 3. أناره المخارج (Exit light ) . 4. انارة الطوارئ (Emergency light). ونظام أطفاء الحريق بواسطة شركة مختصة معتمدة من الدفاع المدني وما يلزم للتشغيل، علما ان البند يشمل جميع عناصر FIRE FIGHTING SYS المذكورة كالتالي: 1. طفاية حريق نوعية جافة (4كج) للأماكن الضيقة والمطابخ و (6كج) للقاعات الرئيسية المفتوحة. 2. طفاية حريق نوعية غاز ثانى أكسيد الكربون (CO2) الغازية (5كج) لغرف الكهرباء. 3. بطانية مقاومة للحريق (HR FIRE BLANKET) . حسب المواصفات العامة والتفصيلية واعتماد النظامين من الدفاع المدني ان احتاج الامر لذلك ، ومن المهندس المختص في الادارة الهندسية .","unit":"عدد","price":70000.0},{"id":1720365113949033,"category":"أنظمة إنذار وإطفاء الحريق","description":"توريد وتركيب Multi- zones-addressable FACP With rechargable Battery Type مع جميع التمديدات اللازمة بواسطة شركة مختصة معتمدة من الدفاع المدني ومع جميع Smoke and Heat detectors وما يلزم للتشغيل علما ان البند يشمل جميع عناصر FIRE FIGHTING و fire alarm مثل 6DP 6KG AND 4.5 KG ALSO FIRE RATED DOORS 1.5HR FIRE BLANKET AND SO ON AS THE ATTACHED PLANS EXIT SIGNS ,, EMMERGENCY LIGHTS حسب المواصفات العامة والتفصيلية للدفاع المدني بعد الاعتماد من المهندس المختص في قسم الصيانة ","unit":"عدد","price":60000.0},{"id":1720365113950064,"category":"أعمال الصوتيات","description":"توريد وتركيب أنظمة صوت كاملة تشمل amplifiers stereo power with .1 % and less THD Line array internal speakers , Digital mixers with phantom 48 volt included feed back eliminating ,and equalizing , and all needed condensater microphones and wireless mics and the boom stand شاملة جميع التوصيلات والكوابل والترنكات اللازمة حسب تصميم الشركة المختصة حسب المواصفات واعتماد المهندس المختص ","unit":"عدد","price":50000.0},{"id":1720365113951094,"category":"كاميرات ونظم أمنية","description":"توريد وتركيب - نظام متكامل - كاميرات المراقبة الأمنية عن طريق شركة معتمدة من إدارة النظم الأمنية للتوريد والتركيب و بحيث يكون من مسؤوليات هذه الشركة تصميم كامل لمخططات كاميرات المراقبة الأمنية على مداخل المسجد والاحواش وخارج المسجد والسطح والدرج والسلالم ((ما عدا القاعة الرئيسية للصلاة ومصلى النساء وتوابعه)) ، ويشمل اعتماد نوعية الكاميرات المركبة ومواصفاتها الفنية واعتماد التصميم من ادارة النظم الامنية في وزارة الداخلية قبل البدء بالتركيب ومن ثم اعتماد ما تم تركيبه من الادارة ذاتها بحيث يتم تركيب نظام الكاميرات حسب شروط ومواصفات إدارة النظم الأمنية في وزارة الداخلية، والتي تشمل على سبيل المثال لا الحصر ما يأتي: 1- لوحات على جميع المداخل للتنبيه بان المكان مراقب بالكاميرات. 2- شمول النظام على اجهزة تسجيل ( NVR ) لديها قابلية الاحتفاظ بالتسجيل لمدة 120 يوم. 3- نظام مراقبة مفتوح على اساس IP وكذلك برنامج VMS يتميز بخيارات التسجيل والتخزين والنقل والسيطرة عن بعد ووامكانية البحث باسماء الكاميرات واماكنها وتاريخ ووقت التسجيل ويكون هذا البرنامج لديه القابليه للتعامل مع اكثر من نوع وماركة من كاميرات المراقبة الامنية. 4- تكون جميع الكاميرات IP65 ومقاومة للحرارة والتخريب وتعمل نهاري وليلي وتعمل بدرجات حرارة ورطوبة عالية ولديها خاصية عدم التكثيف. 5- حد ادنى 4 ميغا بيكسل متنوعة PTZ OR MULTI- LENSقابلة للتقريب متى اقتضى الامر , POI , FIXED CAM , ANPR - ( يعمل لمدة ساعة على الاقل UPS ). يلتزم المقاول/الجهة المنفذة بتوفير نظام متكامل وقابل للتطوير والتوسعة، بما يسمح بدمجه مستقبلاً ضمن شبكة مركزية مرتبطة بغرف تحكم لإدارة عدد كبير من المساجد. ويجب أن يدعم النظام الربط المباشر لكاميرات (POI) مع وزارة الداخلية، وفقًا لما تم طلبه رسميًا، مع تنفيذ جميع المتطلبات الفنية والتجهيزية والبروتوكولات اللازمة، وبما يتوافق كليًا مع متطلبات واعتمادات إدارة النظم الأمنية.","unit":"عدد","price":50000.0},{"id":1720365113952119,"category":"أعمال الكهرباء","description":"توريد وتركيب إنارة خارجية نوعية WALLWASHER LED RGBWA SURFACE MOUNTED بقدرة 40 وات بواقع 36 LED في الوحدة على الاقل ويتم ضبط اللون على اللون العنبر . ويكون التحكم مركزي بالأضافة للتحكم الضوئي والزمني لاضاءة الحوائط الخارجية بحيث يضبط اللون الى لونين ابيض COOL TD في المناطق المنخفضة المستوى والى لون WARM LIGHT في المناطق البارزة بحيث يتم شمل كامل عرض وطول الحوائط بدون اية فراغات ","unit":"عدد","price":45000.0},{"id":1720365113953151,"category":"أعمال الكهرباء","description":"توريد وتركيب إنارة خارجية نوعية WALLWASHER LED RGBWA SURFACE MOUNTED بقدرة 40 وات بواقع 36 LED في الوحدة على الاقل ويتم ضبط اللون على اللون العنبر . ويكون التحكم مركزي بالأضافة للتحكم الضوئي والزمني لاضاءة اعلى المنارة القباب والمحراب من الخارج وفوق المدخل داخل ال جي ار سي ","unit":"عدد","price":45000.0},{"id":1720365113954175,"category":"أعمال الصوتيات","description":"توريد وتركيب نظام صوت كامل للسماعات الخارجية بما يتناسب مع ارتفاع منارة المسجد بحيث تكون هذه السماعات الخارجية بنظام ترانسفورمر وايضا مع درايفر يونت يمكن تركيبه وفكه من الخلف فقط مع ما يلزم من مكبرات الصوت المناسبة شاملة جميع التوصيلات (والمايكرفونات والكوابل والترنكات اللازمة بعد تصميم الشركة المختصه حسب المواصفات واعتماد المهندس المختص ","unit":"عدد","price":20000.0},{"id":1720365113955197,"category":"أعمال الكهرباء","description":"توريد وتركيب وتشغيل جهاز تكييف مركزى Packaged Air Conditioners بقدرة فعلية 20 طن لإستبدال الحالي في المركزمع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات . ","unit":"عدد","price":15000.0},{"id":1720365113956221,"category":"أعمال الكهرباء","description":"عمل مدخل الكيبل الجديد إلى نهاية حدود الارض وحسب الموقع الذي يتم تحديده من قبل كهرماء للمقاول المرخص منها ( معاملة رفع قدرة قاطع كهرماء الرئيسي - الكتاوت )، وتركيب G.I ترنكي ولود واير وعمل كل ما يلزم من ملاحظات مفتش كهرماء بعد تقديم معاملة تقوية القدرة الكهربائية من قبل المقاول المرخص من كهرماء في الاسبوع الاول من استلام المشروع والمتابعة في البلدية وكهرماء إلى حين رفع القدرة الكهربائية في المسجد والتنسيق مع المهندس المشرف لاستصدار الكتب الرسمية اللازمة من الوزارة إلى الإدارات المختلفة ويتم تنفيذ هذا البند بعد اخذ موافقة كهرماء عليه ويكون المقاول ملزما بما عدا ذلك كعمل خزانة خدمة خارجية حسب مواصفات كهرماء مع توابعها الانشائية على حدود الارض مع الكيبل وشبكه ان تم طلب ذلك من كهرماء . ","unit":"عدد","price":15000.0},{"id":1720365113957245,"category":"أعمال الكهرباء","description":"توريد وتركيب إنارة IP65 4FEET W.P LED TYPE أو إنارة IP 65 HUNTER DOGLAS W.P LED TYPEفي الحمامات والمتوضآت والمطابخ وحمامات مصلى النساء و حمامات البيت حسب نوعية السقف مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات ","unit":"عدد","price":400.0},{"id":1720365113958269,"category":"أعمال الكهرباء","description":"توريد و تركيب وحدة إضاءة LED مصممة لعدد 3 لمبات LED أنبوبية T8 بقدرة 18 واط لكل لمبة، وبطول 1200 ملم، مع توصيل مزدوج الطرفين (Double-Sided Connection) و يتميز هذا الهيكل الخطي بدرجة حماية IP65 ضد الغبار والرطوبة، مما يجعله مناسبًا للتركيب في الأماكن الرطبة أو ذات الظروف البيئية القاسية.","unit":"عدد","price":400.0},{"id":1720365113959302,"category":"أعمال الكهرباء","description":"توريد وتركيب 3ph/ 250amp / 4 way PANEL BOARD مع كامل البريكرات الرئيسية والاحتياطية في المسجد لتغذية لوحات التوزيع القديمة والجديدة.","unit":"عدد","price":6000.0},{"id":1720365113960334,"category":"أعمال الكهرباء","description":"توريد وتركيب 3ph/ 200amp / 2 way PANEL BOARDفي المسجد لتغذية لوحات التوزيع القديمة والجديدة مع كامل البريكرات الرئيسة والاحتياطية . ","unit":"عدد","price":6000.0},{"id":1720365113961361,"category":"أعمال الصوتيات","description":"توريد وتركيب مكبر صوت 250WATT PER CHANNEL 2 CHANEL للسماعات الداخلية حسب اعتماد المهندس المختص مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل ","unit":"عدد","price":6000.0},{"id":1720365113962386,"category":"أعمال الصوتيات","description":"توريد وتركيب a16chanel 8 MIC mixer with echo and all effects حسب اعتماد المهندس المختص مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات ","unit":"عدد","price":4000.0},{"id":1720365113963412,"category":"أعمال الصوتيات","description":"توريد وتركيب مكبر صوت 300وات للسماعات الخارجية حسب اعتماد المهندس المختص مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات ","unit":"عدد","price":4000.0},{"id":1720365113964438,"category":"أعمال الكهرباء","description":"توريد وتركيب 3ph/ 100amp / 8 way D.B في الببيت لتغذيته والمتوضأ عن طريق كيبل 25MM2 ارضي داخل بايبات 4 انش ","unit":"عدد","price":3500.0},{"id":1720365113965463,"category":"أعمال الكهرباء","description":"توريد وتركيب 3ph/ 100amp / 8 way D.B في المسجد بدل القديم ","unit":"عدد","price":3000.0},{"id":1720365113966487,"category":"أعمال الكهرباء","description":"توريد وتركيب إنارة خارجية نوعية COB LED OR POWER LED بقدرة من 25- الى 40 وات ولا تقل درجة الحماية عن (IP65) ويكون الغطاء في الحالات جميعها اما POLYCARBONATED OR CLEAR GLASS BK7 مع جميع التمديدات اللازمة مخفية حول المسجد بحيث تكون مركبة على اعمدة ستيل بطول 3متر حسب المواصفات حسب المخطط بحيث يتم توصيلها وتشغيلها بواسطة كونتاكتر مع تايمر رقمي لسبعة ايام متعدد الضبط مع مفتاح للتشغيل اليدوي والوحدة جانبا لعدد الاعمدة واماكن التركيب هو مواقف السيارات ","unit":"عدد","price":3000.0},{"id":1720365113967512,"category":"أعمال الكهرباء","description":"توريد وتركيب إنارة خارجية طابع تراثي decorative steel powder coated type مع LED lamp 9-12 watt مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات وتكون مركبة على اعمدة ستيل بطول 3متر حسب المواصفات بواقع عمود لكل ثلاث وحدات انارة حسب المخطط بحيث يتم توصيلها وتشغيلها بواسطة كونتاكتر مع تايمر رقمي لسبعة ايام متعدد الضبط مع مفتاح للتشغيل اليدوي والوحدة جانبا لعدد الاعمدة واماكن التركيب هو مواقف السيارات ","unit":"عدد","price":3000.0},{"id":1720365113968536,"category":"أعمال الصوتيات","description":"توريد وتركيب مايكروفون CONDENSER TYPE مع Boom stand حسب اعتماد المهندس المختص مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات ","unit":"عدد","price":1000.0},{"id":1720365113969561,"category":"أعمال الكهرباء","description":"توريد وتركيب 1ph/ 60amp / 10 way D.B في الغرفة الجديدة ","unit":"عدد","price":2500.0},{"id":1720365113970585,"category":"أعمال الصوتيات","description":"توريد وتركيب سماعة داخلية في المحراب 30watt monitor speaker مع ترانسفورمر حسب اعتماد المهندس المختص مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل مع مكبر الصوت 60 وات الخاص بها حسب المواصفات ","unit":"عدد","price":2500.0},{"id":1720365113971609,"category":"أعمال الكهرباء","description":"توريد وتركيب خزانة خشبية (( مشربية ))لمجمع الكهرباء ( يجب تقديم مخططات تنفيذية لاعتمادها من قبل المهندس المشرف.","unit":"عدد","price":2000.0},{"id":1720365113972632,"category":"أعمال الكهرباء","description":"توريد وتركيب خزانة المنيوم مع عمل التهوية المناسبة لمجمع الكهرباء ","unit":"عدد","price":2000.0},{"id":1720365113973656,"category":"أعمال الكهرباء","description":"توريد وتبديل 3ph/ 100amp / 12 way D.B في بيت الامام و أزالة القديم و عمل جميع التمديدات اللازمة مخفية حسب المخططات الكهرباء التنفيذية المقدمة من طرف المقاول و المعتمدة من وزارة الاوقاف . ","unit":"عدد","price":2000.0},{"id":1720365113974679,"category":"أعمال الكهرباء","description":" توصيل كهرباء مكيف Split unit Free Standing type بقدرة فعلية 48000 BTU/H للمسجد كاملاً، عدد 21 لقاعة الصلاة الرئيسية وعدد 4 لقاعة الصلاة اليومية وعدد 3 لمصلى النساء حسب المخططات المرفقة مع التمديدات (مخفية) وبحيث تكون الوحدة الخارجية على السطح مع توصيل الكهرباء للمكيف بواسطة كيبل 10mm2 وتركيب isolater 63amp W.P steel type يمرر على cable tray ومغطى ب G.I TRUNK مع جميع التمديدات اللازمة مخفية حسب مخططات الكهرباء التنفيذية المقدمة من طرف المقاول و المعتمدة من وزارة الاوقاف . ","unit":"عدد","price":2000.0},{"id":1720365113975703,"category":"أعمال الكهرباء","description":" توصيل كهرباء مكيف من النوع المجزأ split unit في غرفة الحارس مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات . ","unit":"عدد","price":1500.0},{"id":1720365113976727,"category":"أعمال الكهرباء","description":"توصيل كهرباء جهاز تبريد المياه الخزانات العلوية لمياه الوضوء مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات . ","unit":"عدد","price":1500.0},{"id":1720365113977750,"category":"أعمال الكهرباء","description":"توصيل كهرباء جهاز تبريد المياه بقدرة تبريد 24000BTU/H مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات . ","unit":"عدد","price":1500.0},{"id":1720365113978774,"category":"أعمال الكهرباء","description":"توصيل كهرباء مكيف Split unit Wall Mounted type بقدرة فعلية 18000 BTU/H عدد 1 لغرفة المخزن وعدد 1 لغرفة الكهرباء وعدد 1 لغرفة الحارس وعدد 1 في بيت المؤذن وعدد 2 في بيت الإمام حسب المواصفات مع التمديدات وبحيث تكون الوحدة الخارجية على السطح مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات . ","unit":"عدد","price":1500.0},{"id":1720365113979798,"category":"أعمال الكهرباء","description":"توصيل كهرباء مكيف Split unit Wall Mounted type بقدرة فعلية 24000 BTU/H عدد 1 في المحراب وعدد 2 لبيت المؤذن وعدد 2 لبيت الإمام وعدد 1 لمطبخ بيت الامام حسب المواصفات مع التمديدات وبحيث تكون الوحدة الخارجية على السطح مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات . ","unit":"عدد","price":1500.0},{"id":1720365113980821,"category":"أعمال الكهرباء","description":"توصيل كهرباء مكيف من النوع المجزأ split unit بقدرة تبريد 30000BTU/H مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات . ","unit":"عدد","price":1500.0},{"id":1720365113981845,"category":"أعمال الكهرباء","description":"توصيل كهرباء مكيف من النوع المجزأ split unit بقدرة تبريد 36000BTU/H مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات . ","unit":"عدد","price":1500.0},{"id":1720365113982869,"category":"أعمال الكهرباء","description":"توصيل كهرباء مكيف من النوع المجزأ split unit بقدرة تبريد 24000BTU/H مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات . ","unit":"عدد","price":1500.0},{"id":1720365113983893,"category":"أعمال الكهرباء","description":"توريد وتركيب مروحة تهوية لمطبخ المركز (Centrifugal roof fan - horizontal discharge) مع (with roof cowl) بقدرة 200 cfm يتم تثبيتها على السطح مع تثبيت egg crate grille على السقف داخل المطبخ مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات . ","unit":"عدد","price":1500.0},{"id":1720365113984918,"category":"أعمال الصوتيات","description":"توريد وتركيب سماعات خارجية 25-50 وات مع ترانسفورمر حسب اعتماد المهندس المختص مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات ","unit":"عدد","price":1200.0},{"id":1720365113985942,"category":"أعمال الصوتيات","description":"توريد وتركيب سماعات داخلية 30 وات حسب اعتماد المهندس المختص مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات ","unit":"عدد","price":1200.0},{"id":1720365113986966,"category":"أعمال الكهرباء","description":"توريد وتركيب إنارة decorative type مطلية بالذهب مع لمبة LED 9-12WATT مع ضمان عشر سنوات بعدم تغير اللون الذهبي داخل قاعة الصلاة وفي المداخل بواسطة سلسلة ذهبية اللون مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات ","unit":"عدد","price":1200.0},{"id":1720365113987990,"category":"أعمال الكهرباء","description":" توريد وتركيب إنارة decorative type مطلية بالذهب مع لمبة LED 9-12WATT مع ضمان عشر سنوات بعدم تغير اللون الذهبي داخل قاعة الصلاة في المحراب مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات ","unit":"عدد","price":1200.0},{"id":1720365113989014,"category":"أعمال الكهرباء","description":"توريد وتركيب وحدات إنارة (Spot Light) من نوعية 15WATT CREE COB WITH DRIVER AND ELECTROSTATIC POWDER COATED ALUMINUM INJECTION BODY , BK7 DIFFUSER في الصالة الرئيسية للقبة من الداخل مع جميع التمديدات اللازمة مخفية والمشار اليها بالرمز E في المخطط","unit":"عدد","price":1000.0},{"id":1720365113990038,"category":"أعمال الكهرباء","description":" توريد وتركيب إنارة خارجية نوعية كشافات الإضاءة الغاطسة :(In Ground Luminaire)تكون شديدة التحمل ( Heavy Duty)، لا تقل درجة الحماية عن (IP68) و تكون من النوع (Adjustable Uplight) وتستخدم لمبات (POWER LED 12 WATT ","unit":"عدد","price":1000.0},{"id":1720365113991062,"category":"أعمال الكهرباء","description":" توريد وتركيب كشافات نوعية LED COB 100 WATT أو لمبات (CREE POWER LED 100 WATT) في اعلى المنارة مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات . وازالة جميع الانارات الاخرى حولها واسفلها مع تمديداتها بحيث يتم توصيلها وتشغيلها بواسطة كونتاكتر مع تايمر رقمي لسبعة ايام متعدد الضبط مع مفتاح للتشغيل اليدوي ","unit":"عدد","price":1000.0},{"id":1720365113992085,"category":"أعمال الكهرباء","description":"توريد وتركيب انارة داخلية نوعية LED PANEL بمقاسات 60سم *120سم بقدرة 80 وات في المسجد والبيت مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات ","unit":"عدد","price":700.0},{"id":1720365113993109,"category":"أعمال الكهرباء","description":" توريد وتركيب كشافات LED COB DISPLAY TYPE30-60 WATT أو لمبات (CREE POWER DISPLAY TYPE LED 30-60 WATT) للقبة من الداخل مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات وازالة جميع الانارات الاخرى ","unit":"عدد","price":700.0},{"id":1720365113994132,"category":"أعمال الكهرباء","description":"توريد وتركيب وحدات إضاءة جدارية خارج المسجد ذات طابع تراثي مزودة بلمبات LED 9WATT وتكونW,P IP 65.مع جميع التمديدات اللازمة مخفية حول المسجد بحيث يتم توصيلها وتشغيلها بواسطة كونتاكتر مع تايمر رقمي لسبعة ايام متعدد الضبط مع مفتاح للتشغيل اليدوي وما يلزم للتشغيل حسب المواصفات ","unit":"عدد","price":600.0},{"id":1720365113995156,"category":"أعمال الكهرباء","description":"توريد وتركيب وحدات إضاءة جدارية خارج المسجد او بواسطة سلسلة حسب مكان التركيب ، ذات طابع تراثي مزودة بلمبات LED 9WATT وتكونW,P IP 65.مع جميع التمديدات اللازمة مخفية حول المسجد بحيث يتم توصيلها وتشغيلها بواسطة كونتاكتر مع تايمر رقمي لسبعة ايام متعدد الضبط مع مفتاح للتشغيل اليدوي وما يلزم للتشغيل حسب المواصفات ","unit":"عدد","price":600.0},{"id":1720365113996180,"category":"أعمال الكهرباء","description":" توريد وتركيب وحدات إضاءة جدارية خارج المسجد نوعية COB LED OR POWER LED بقدرة من 25- الى 40 وات حسب الطلب واعتماد المهندس المشرف ولا تقل درجة الحماية عن (IP65) ويكون الغطاء في الحالات جميعها اما POLYCARBONATED OR CLEAR GLASS BK7 مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حول المسجد بحيث يتم توصيلها وتشغيلها بواسطة كونتاكتر مع تايمر رقمي لسبعة ايام متعدد الضبط مع مفتاح للتشغيل اليدوي حسب المواصفات ","unit":"عدد","price":900.0},{"id":1720365113997204,"category":"أعمال الكهرباء","description":"توريد وتركيب لوح إضاءة LED دائري مثبت سطحياً بقدرة 18 واط، عالي الكفاءة، ببدن معدني مطلي، وعدسة بصرية لتوزيع منتظم للضوء، بدرجة حماية لا تقل عن IP20، وبلون ضوئي (CCT) يتراوح بين 3000K–6500K، مع ضمان لا يقل عن سنتين.","unit":"عدد","price":900.0},{"id":1720365113998228,"category":"أعمال الكهرباء","description":"توريد وتركيب انارة داخلية نوعية LED PANEL بمقاسات 30سم * 120 سم بقدرة تتراوح ما بين 40-50 وات في المسجد ومصلى النساء والبيت مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات ","unit":"عدد","price":500.0},{"id":1720365113999252,"category":"أعمال الكهرباء","description":"توريد وتركيب انارة داخلية نوعية LED PANEL بمقاسات 60سم *60 سم بقدرة تتراوح ما بين 40-50 وات في المسجد والبيت مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات ","unit":"عدد","price":500.0},{"id":1720365114000276,"category":"أعمال الكهرباء","description":" إنارة جانبية : (Decorative Luminaires) توريد وتركيب وحدات مع لمبات 15 WATT AMENITY LED BULKHEAD او وحدات 9WATT LED WALL TYPE مع امكانية التحكم بزاوية التركيب بين 10 الى 120 درجة في المسجد داخل المحراب مع جميع التمديدات مخفية وما يلزم للتشغيل حسب المواصفات ","unit":"عدد","price":500.0},{"id":1720365114001300,"category":"أعمال الكهرباء","description":"توريد وتركيب انارة داخلية نوعية LED PANEL SLIM TYPE بمقاسات 60سم *60 سم بقدرة تتراوح ما بين 40-50 وات في المسجد والبيت مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات ","unit":"عدد","price":500.0},{"id":1720365114002324,"category":"أعمال الكهرباء","description":"توريد وتركيب انارة ( Down Light ) 20-26 WATT COB LED او CREE POWER LED مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات ","unit":"عدد","price":500.0},{"id":1720365114003348,"category":"أعمال الكهرباء","description":"توريد وتركيب جرس كهربائي low volt للبيت مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات ","unit":"عدد","price":500.0},{"id":1720365114004372,"category":"أعمال الكهرباء","description":"توصيل كهرباء الطباخ 45 amp مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات ","unit":"عدد","price":500.0},{"id":1720365114005396,"category":"أعمال الكهرباء","description":"توصيل كهرباء المكيف 2 طن والتمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات ","unit":"عدد","price":500.0},{"id":1720365114006419,"category":"أعمال الكهرباء","description":"توريد وتركيب انارة داخلية WITH EXTERNAL DRIVER TYPE 2*18 WATT LED مع عاكس المنيوم في قاعة الصلاة ومصلى النساء والمصلى اليومي مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات .","unit":"عدد","price":450.0},{"id":1720365114007443,"category":"أعمال الكهرباء","description":"توريد وتركيب وحدة انارة داخلية تحتوي LED TUBE 4FEET 21 WATT OR WATT1*18 مع غطاء UV PROTECTED DIFUSER مخفية بكورنيش ديكور الجبس الجديد ومثبته على الاسطح الدخلية او بواسطة براكيتس مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات ","unit":"عدد","price":450.0},{"id":1720365114008467,"category":"أعمال الكهرباء","description":"توريد وتركيب إنارة (Spot Light) نوعية 5-15 وات CREE COB WITH DRIVER في المسجد والبيت مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات . ","unit":"عدد","price":300.0},{"id":1720365114009491,"category":"أعمال الكهرباء","description":"توريد وتركيب مراوح سقفية للقاعة الرئيسية ومصلى النساء والفرندة المسقوفة ","unit":"عدد","price":300.0},{"id":1720365114010515,"category":"أعمال الكهرباء","description":" توريد وتركيب S SOCKET 13 AMPفي المطابخ والبيوت الجديدة وقاعة الصلاة مع جميع التمديدات اللازمة مخفية وما يلزم للتشغيل حسب المواصفات ","unit":"عدد","price":200.0},{"id":1720365114011539,"category":"أعمال الكهرباء","description":"التأسيس للتمديدات الكهربائية لوضع أنارة فى الأحواض الزراعية(داخل الأحواض ) مستقبلا ، ويتم توصيلها وتشغيلها عن طريق كونتاكتر كهربائي مرتبط بـ تايمر رقمي متعدد الضبط (سبعة أيام) مع مفتاح تشغيل يدوي (Manual Override). حسب الرسومات الموضحة في المخططات التنفيذية، ويتم تنفيذ جميع الأعمال حسب الأصول الفنية وتعليمات المهندس المشرف .","unit":"عدد","price":200.0},{"id":1720365114012563,"category":"أعمال الكهرباء","description":"تبديل جميع السوتشات والسوكتات الى جديد والبند يشمل مفاتيح المكيفات والمخارج لها والمفاتيح الخارجية وداخل المتوضأ الى W.P ","unit":"عدد","price":20.0},{"id":1720365114013587,"category":"أعمال الكهرباء","description":"ازالة جميع الترنكات والوايرات الداخلية والخارجية الظاهرة واخفاء اللازم منها داخل الجدران وازالة جميع الانارات العشوائية الجانبية مع تمديداتها ","unit":"عدد","price":30.0},{"id":1720365114014611,"category":"أعمال الكهرباء","description":"ازالة جميع المراوح السقفية والجدارية مع جميع التمديدات التابعة لها ","unit":"عدد","price":100.0},{"id":1720365114015635,"category":"أعمال الكهرباء","description":"توريد وتركيب لمبات للثريا 4Watt LED lamp with aluminum body and UV protected diffuser.وما يلزم للتشغيل حسب المواصفات ","unit":"عدد","price":50.0}];
+        const masterCategoriesData = ["أعمال الكهرباء", "أعمال الصوتيات", "أنظمة إنذار وإطفاء الحريق", "كاميرات ونظم أمنية", "إنارة (Lighting)", "قوى ومآخذ (Power)", "كابلات ومسارات (Cables)", "لوحات توزيع (Panels)", "تأريض وحماية (Earthing)", "تيار خفيف (Low Current)"];
+        
+        let items = [], categories = [], allProjects = [], trash = [], currentProjectId = null, adminPassword = '1234', isAdminAuthenticated = false;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            loadDataFromStorage();
+            populateCategoryDropdowns();
+            if (currentProjectId && allProjects.some(p => p.projectId === currentProjectId)) {
+                document.getElementById('tabPricingBtn').classList.remove('hidden');
+                switchTab('pricing');
+            } else {
+                switchTab('projects');
+            }
+        });
+
+        function loadDataFromStorage() {
+            let storedItems = localStorage.getItem("electrical_boq_items");
+            if (storedItems) {
+                items = JSON.parse(storedItems);
+                categories = JSON.parse(localStorage.getItem("electrical_boq_categories"));
+            } else {
+                items = masterItemsData;
+                categories = masterCategoriesData;
+                localStorage.setItem("electrical_boq_items", JSON.stringify(items));
+                localStorage.setItem("electrical_boq_categories", JSON.stringify(categories));
+            }
+            allProjects = JSON.parse(localStorage.getItem("electrical_boq_all_projects")) || [];
+            trash = JSON.parse(localStorage.getItem("electrical_boq_trash")) || [];
+            currentProjectId = JSON.parse(localStorage.getItem("electrical_boq_current_project_id")) || null;
+            adminPassword = localStorage.getItem("electrical_boq_pass") || "1234";
+            updateAllCounts();
+        }
+
+        function updateAllCounts() {
+            document.getElementById("masterCount").innerText = items.length;
+            document.getElementById("projectsCount").innerText = allProjects.length;
+        }
+
+        function switchTab(tabId) {
+            ["master", "projects", "pricing"].forEach(id => {
+                const content = document.getElementById(`tab${capitalize(id)}Content`);
+                const btn = document.getElementById(`tab${capitalize(id)}Btn`);
+                if (content) content.classList.add('hidden');
+                if (btn) { btn.classList.remove('tab-btn-active'); btn.classList.add('tab-btn-inactive'); }
+            });
+            if (tabId === 'pricing' && !currentProjectId) return switchTab('projects');
+            
+            const activeBtn = document.getElementById(`tab${capitalize(tabId)}Btn`);
+            const activeContent = document.getElementById(`tab${capitalize(tabId)}Content`);
+            if(activeBtn) { activeBtn.classList.add('tab-btn-active'); activeBtn.classList.remove('tab-btn-inactive'); }
+            if(activeContent) activeContent.classList.remove('hidden');
+
+            if (tabId === 'master') renderMasterItems();
+            if (tabId === 'projects') renderProjectsList();
+            if (tabId === 'pricing') renderPricingPage();
+        }
+
+        function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+        function populateCategoryDropdowns() {
+            ['itemCategory', 'filterCategory'].forEach(id => {
+                const select = document.getElementById(id);
+                const currentVal = select.value;
+                select.innerHTML = (id === 'filterCategory' ? '<option value="كل الأقسام">كل الأقسام</option>' : '') + 
+                                   categories.map(cat => `<option value="${escapeHTML(cat)}">${escapeHTML(cat)}</option>`).join('');
+                if (categories.includes(currentVal)) select.value = currentVal;
+            });
+        }
+
+        function renderMasterItems() {
+            const query = document.getElementById('searchQuery').value.toLowerCase();
+            const filter = document.getElementById('filterCategory').value;
+            const container = document.getElementById('itemsContainer');
+            container.innerHTML = '';
+            const canAddToProject = currentProjectId !== null;
+
+            const filtered = items.filter(item => {
+                const matchesQuery = (item.description || '').toLowerCase().includes(query) || (item.category || '').toLowerCase().includes(query);
+                const matchesFilter = filter === 'كل الأقسام' || item.category === filter;
+                return matchesQuery && matchesFilter;
+            }).sort((a,b) => a.description.localeCompare(b.description));
+            
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="bg-white p-12 text-center text-slate-400 rounded-3xl border-dashed border-2"><span>📁</span><p>لا توجد بنود تطابق بحثك.</p></div>`;
+                return;
+            }
+            
+            let projectItemsIds = [];
+            if (canAddToProject) {
+                const project = allProjects.find(p => p.projectId === currentProjectId);
+                if (project) projectItemsIds = project.items.map(pi => pi.id);
+            }
+            
+            filtered.forEach(item => {
+                const isInProject = canAddToProject && projectItemsIds.includes(item.id);
+                const card = document.createElement("div");
+                card.className = "bg-white p-6 rounded-3xl shadow-sm border hover:border-indigo-200 transition-all group";
+                card.innerHTML = `
+                    <div class="flex justify-between items-start gap-4">
+                        <span class="inline-block bg-indigo-50 text-indigo-700 text-xs font-bold px-3 py-1.5 rounded-full">${escapeHTML(item.category)}</span>
+                        <div class="flex gap-3 opacity-0 group-hover:opacity-100 transition-all">
+                            <button onclick="editItem(${item.id})" class="text-xs font-bold text-indigo-600 hover:underline">✏️ تعديل</button>
+                            <button onclick="deleteItem(${item.id})" class="text-xs font-bold text-red-500 hover:underline">🗑️ حذف</button>
+                        </div>
+                    </div>
+                    <div class="text-sm font-semibold mt-4 text-slate-800 leading-relaxed">${item.description.replace(/\n/g, '<br>')}</div>
+                    <div class="mt-5 pt-4 border-t flex justify-between items-center">
+                        <div class="text-xs text-slate-500"><span>السعر: <strong class="text-indigo-600">${item.price.toFixed(2)} ر.ق</strong></span></div>
+                        <button onclick="openItemEditorForProject(${item.id}, false)" ${!canAddToProject || isInProject ? "disabled" : ""} class="px-4 py-2 rounded-xl text-xs font-bold transition-all ${canAddToProject ? (isInProject ? "bg-emerald-50 text-emerald-700 cursor-default" : "bg-indigo-900 hover:bg-black text-white") : "bg-slate-200 text-slate-400 cursor-not-allowed"}">
+                            ${canAddToProject ? (isInProject ? "✔️ مضاف" : "➕ إضافة وتخصيص") : "حمّل مشروعاً"}
+                        </button>
+                    </div>`;
+                container.appendChild(card);
+            });
+        }
+
+        function saveMasterItem(event) {
+            event.preventDefault();
+            const id = document.getElementById("itemId").value;
+            const newItemData = {
+                category: document.getElementById("itemCategory").value,
+                description: document.getElementById("itemDescription").value,
+                unit: document.getElementById("itemUnit").value,
+                price: parseFloat(document.getElementById("itemPrice").value)
+            };
+            if (id) {
+                const index = items.findIndex(item => item.id == id);
+                if (index !== -1) items[index] = { id: Number(id), ...newItemData };
+            } else {
+                items.push({ id: Date.now(), ...newItemData });
+            }
+            localStorage.setItem("electrical_boq_items", JSON.stringify(items));
+            updateAllCounts();
+            resetForm();
+            renderMasterItems();
+        }
+
+        function editItem(id) {
+            const item = items.find(i => i.id == id);
+            if (item) {
+                document.getElementById("itemId").value = item.id;
+                document.getElementById("itemCategory").value = item.category;
+                document.getElementById("itemDescription").value = item.description.replace(/<br>/g, "\n");
+                document.getElementById("itemUnit").value = item.unit;
+                document.getElementById("itemPrice").value = item.price;
+                document.getElementById("formTitle").innerHTML = "✏️ تعديل البند المرجعي";
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            }
+        }
+
+        function deleteItem(id) {
+            if (confirm("هل أنت متأكد من حذف هذا البند نهائياً من قاعدة البيانات؟")) {
+                items = items.filter(item => item.id != id);
+                localStorage.setItem("electrical_boq_items", JSON.stringify(items));
+                allProjects.forEach(proj => {
+                    proj.items = proj.items.filter(pItem => pItem.id !== id);
+                });
+                localStorage.setItem("electrical_boq_all_projects", JSON.stringify(allProjects));
+                updateAllCounts();
+                renderMasterItems();
+                if (currentProjectId) renderPricingPage();
+            }
+        }
+
+        function resetForm() {
+            document.getElementById("itemForm").reset();
+            document.getElementById("itemId").value = "";
+            document.getElementById("formTitle").innerHTML = "📝 إضافة بند جديد";
+        }
+
+        function renderProjectsList() {
+            const container = document.getElementById("projectsListContainer");
+            container.innerHTML = "";
+            if (allProjects.length === 0) {
+                container.innerHTML = `<div class="bg-white p-16 text-center text-slate-400 rounded-3xl border-dashed border-2"><span>🗂️</span><p>لا توجد مشاريع.</p></div>`;
+                return;
+            }
+            allProjects.forEach(proj => {
+                const card = document.createElement("div");
+                card.className = "bg-white p-6 rounded-3xl shadow-sm border flex flex-col justify-between";
+                card.innerHTML = `
+                    <div>
+                        <p class="text-xs text-slate-400">${escapeHTML(proj.projectArea)}</p>
+                        <h3 class="font-bold text-lg text-indigo-950">${escapeHTML(proj.projectName)}</h3>
+                        <p class="text-xs text-slate-500 mt-2">البنود: ${proj.items.length}</p>
+                    </div>
+                    <div class="flex gap-2 mt-4 pt-4 border-t">
+                        <button onclick="loadProject(${proj.projectId})" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-xl text-xs font-bold">تحميل</button>
+                        <button onclick="editProjectDetails(${proj.projectId})" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl text-xs font-bold">✏️</button>
+                        <button onclick="deleteProject(${proj.projectId})" class="bg-rose-100 hover:bg-rose-200 text-rose-600 px-3 py-2 rounded-xl text-xs font-bold">حذف</button>
+                    </div>`;
+                container.appendChild(card);
+            });
+        }
+    
+        function editProjectDetails(projectId) {
+            let project = allProjects.find(p => p.projectId === projectId);
+            if (project) {
+                let newName = prompt("تعديل اسم المشروع:", project.projectName);
+                if (newName === null) return; newName = newName.trim();
+                if (!newName) return alert("الاسم فارغ.");
+                
+                let newArea = prompt("تعديل المنطقة:", project.projectArea);
+                if (newArea === null) return; newArea = newArea.trim();
+                if (!newArea) return alert("المنطقة فارغة.");
+                
+                project.projectName = newName;
+                project.projectArea = newArea;
+                localStorage.setItem("electrical_boq_all_projects", JSON.stringify(allProjects));
+                renderProjectsList();
+                if (currentProjectId === projectId) renderPricingPage();
+                alert("تم تعديل التفاصيل!");
+            }
+        }
+
+        function createNewProject() {
+            const name = document.getElementById("newProjectName").value.trim();
+            const area = document.getElementById("newProjectArea").value.trim();
+            if (!name || !area) return alert("الرجاء إدخال اسم ومنطقة المشروع.");
+            const newProject = { projectId: Date.now(), projectName: name, projectArea: area, items: [], createdAt: new Date().toISOString() };
+            allProjects.unshift(newProject);
+            localStorage.setItem("electrical_boq_all_projects", JSON.stringify(allProjects));
+            document.getElementById("newProjectName").value = "";
+            document.getElementById("newProjectArea").value = "";
+            updateAllCounts();
+            loadProject(newProject.projectId);
+        }
+
+        function loadProject(projectId) {
+            currentProjectId = projectId;
+            localStorage.setItem("electrical_boq_current_project_id", JSON.stringify(currentProjectId));
+            document.getElementById('tabPricingBtn').classList.remove('hidden');
+            switchTab('pricing');
+        }
+
+        function deleteProject(projectId) {
+            const projectIndex = allProjects.findIndex(p => p.projectId === projectId);
+            if (projectIndex > -1) {
+                if (confirm(`هل أنت متأكد من حذف مشروع "${allProjects[projectIndex].projectName}"؟ سينتقل إلى سلة المحذوفات.`)) {
+                    const [deletedProject] = allProjects.splice(projectIndex, 1);
+                    trash.unshift(deletedProject);
+                    localStorage.setItem("electrical_boq_all_projects", JSON.stringify(allProjects));
+                    localStorage.setItem("electrical_boq_trash", JSON.stringify(trash));
+                    if (currentProjectId === projectId) {
+                        currentProjectId = null;
+                        localStorage.removeItem("electrical_boq_current_project_id");
+                        document.getElementById('tabPricingBtn').classList.add('hidden');
+                        switchTab('projects');
+                    } else { renderProjectsList(); }
+                    updateAllCounts();
+                    renderMasterItems();
+                }
+            }
+        }
+
+        function renderPricingPage() {
+            const container = document.getElementById("tabPricingContent");
+            const project = allProjects.find(p => p.projectId === currentProjectId);
+            if (!project) {
+                container.innerHTML = `<div class="text-center p-8 bg-white rounded-3xl">خطأ: المشروع غير موجود.</div>`;
+                document.getElementById('tabPricingBtn').classList.add('hidden');
+                return;
+            }
+            container.innerHTML = `<div class="bg-white p-6 rounded-3xl shadow-sm border flex flex-col md:flex-row justify-between items-center gap-4"><div><p class="text-sm font-bold text-indigo-800">${escapeHTML(project.projectArea)}</p><h2 class="text-xl font-bold text-slate-900">${escapeHTML(project.projectName)}</h2></div><div class="flex items-center gap-4"><div class="text-left"><span class="text-xs font-bold text-slate-400 block">الإجمالي</span><span id="pricingPageGrandTotal" class="text-2xl font-extrabold text-indigo-900">0.00 ر.ق</span></div><button onclick="exportProjectToStyledExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-2xl text-sm font-bold shadow-md">📊 تصدير Excel (معتمد)</button></div></div><div id="pricingItemsContainer" class="space-y-4"></div>`;
+            
+            const itemsContainer = document.getElementById("pricingItemsContainer");
+            itemsContainer.innerHTML = "";
+            let grandTotal = 0;
+            if (project.items.length === 0) {
+                itemsContainer.innerHTML = `<div class="bg-white p-16 text-center text-slate-400 rounded-3xl border-dashed border-2"><span>🛒</span><p>المشروع فارغ.</p></div>`;
+            } else {
+                project.items.forEach(item => {
+                    const total = (item.price || 0) * (item.quantity || 0);
+                    grandTotal += total;
+                    const itemEl = document.createElement("div");
+                    itemEl.className = "bg-white p-6 rounded-3xl shadow-sm border flex flex-col md:flex-row gap-6 justify-between items-start md:items-center";
+                    itemEl.innerHTML = `
+                        <div class="flex-1">
+                            <div class="prose max-w-none text-sm font-semibold text-slate-800 leading-relaxed">${item.description}</div>
+                            <div class="text-xs text-slate-400 mt-2">سعر الوحدة: ${item.price.toFixed(2)} ر.ق | الوحدة: ${escapeHTML(item.unit)}</div>
+                        </div>
+                        <div class="flex items-center gap-4 w-full md:w-auto justify-between pt-4 border-t md:border-t-0 md:pt-0">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-bold text-slate-500">الكمية:</span>
+                                <input type="number" min="0.1" step="any" value="${item.quantity}" onchange="updateProjectItemQuantity(${item.id}, this.value)" class="w-20 p-2 bg-slate-50 border rounded-lg text-sm text-center font-bold">
+                            </div>
+                            <div class="text-left min-w-[120px]">
+                                <span class="text-[10px] font-bold text-slate-400 block">الإجمالي الفرعي</span>
+                                <span class="text-sm font-extrabold text-indigo-900">${total.toFixed(2)} ر.ق</span>
+                            </div>
+                            <div class="flex gap-1">
+                                <button onclick="openItemEditorForProject(${item.id}, true)" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 p-2.5 rounded-xl text-xs font-bold">✏️</button>
+                                <button onclick="removeProjectItem(${item.id})" class="text-rose-500 hover:bg-rose-50 p-2.5 rounded-xl font-bold text-xs">✕</button>
+                            </div>
+                        </div>`;
+                    itemsContainer.appendChild(itemEl);
+                });
+            }
+            document.getElementById("pricingPageGrandTotal").innerText = `${grandTotal.toLocaleString("en-US",{minimumFractionDigits: 2, maximumFractionDigits: 2})} ر.ق`;
+        }
+        
+        function updateProjectItemQuantity(id, value) {
+            const quantity = parseFloat(value);
+            if (isNaN(quantity) || quantity < 0) return;
+            const projIndex = allProjects.findIndex(p => p.projectId === currentProjectId);
+            if (projIndex > -1) {
+                const itemIndex = allProjects[projIndex].items.findIndex(i => i.id === id);
+                if (itemIndex > -1) {
+                    allProjects[projIndex].items[itemIndex].quantity = quantity;
+                    localStorage.setItem("electrical_boq_all_projects", JSON.stringify(allProjects));
+                    renderPricingPage();
+                }
+            }
+        }
+
+        function removeProjectItem(id) {
+            const projIndex = allProjects.findIndex(p => p.projectId === currentProjectId);
+            if (projIndex > -1) {
+                allProjects[projIndex].items = allProjects[projIndex].items.filter(i => i.id !== id);
+                localStorage.setItem("electrical_boq_all_projects", JSON.stringify(allProjects));
+                renderPricingPage();
+                renderMasterItems();
+            }
+        }
+        
+        function openAdminModal() {
+            let container = document.getElementById("adminModalContainer");
+            container.innerHTML = `
+                <div id="adminModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95">
+                        <div id="authView" class="p-8"><h3 class="text-xl font-bold text-indigo-950 mb-4">لوحة الأدمن</h3><input type="password" id="adminPasswordInput" class="w-full p-3 bg-slate-50 border rounded-xl" placeholder="الرقم السري"><div class="flex gap-2 pt-4"><button onclick="authenticateAdmin()" class="flex-1 bg-indigo-950 text-white py-3 rounded-xl">دخول</button><button onclick="closeAdminModal()" class="bg-slate-100 text-slate-600 px-6 py-3 rounded-xl">إلغاء</button></div></div>
+                        <div id="controlPanelView" class="p-8 hidden max-h-[85vh] overflow-y-auto">
+                            <div class="flex justify-between items-center mb-6 pb-4 border-b"><h3 class="text-xl font-bold text-indigo-950">⚙️ لوحة التحكم</h3><button onclick="logoutAdmin()" class="text-xs font-bold text-red-500">خروج</button></div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div>
+                                    <div class="mb-6"><h4 class="font-bold text-slate-700 mb-3">إدارة الأقسام</h4><div class="flex gap-2 mb-4"><input type="text" id="newCategoryInput" class="flex-1 p-3 bg-slate-50 border rounded-xl" placeholder="قسم جديد..."><button onclick="addNewCategory()" class="bg-emerald-600 text-white px-5 py-3 rounded-xl">إضافة</button></div><div id="categoriesList" class="space-y-2 max-h-40 overflow-y-auto border p-2 rounded-2xl bg-slate-50"></div></div>
+                                    <div class="pt-6 border-t"><h4 class="font-bold text-slate-700 mb-3">🔑 تغيير الرقم السري</h4><div class="grid grid-cols-2 gap-3 mb-3"><input type="password" id="newPass" class="p-3 bg-slate-50 border rounded-xl" placeholder="جديد"><input type="password" id="confirmPass" class="p-3 bg-slate-50 border rounded-xl" placeholder="تأكيد"></div><button onclick="changePassword()" class="w-full bg-indigo-950 text-white py-3 rounded-xl">تحديث</button></div>
+                                </div>
+                                <div><h4 class="font-bold text-slate-700 mb-3">♻️ سلة المحذوفات</h4><div id="trashContainer" class="space-y-2 max-h-80 overflow-y-auto border p-3 rounded-2xl bg-slate-50"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            container.classList.remove("hidden");
+            isAdminAuthenticated ? showControlPanel() : showAuthView();
+        }
+        function closeAdminModal() { document.getElementById("adminModalContainer").innerHTML = ""; }
+        function showAuthView() { document.getElementById("authView").classList.remove("hidden"); document.getElementById("controlPanelView").classList.add("hidden"); }
+        function showControlPanel() { document.getElementById("authView").classList.add("hidden"); document.getElementById("controlPanelView").classList.remove("hidden"); renderCategoriesList(); renderTrash(); }
+        function authenticateAdmin() { document.getElementById("adminPasswordInput").value === adminPassword ? (isAdminAuthenticated = true, showControlPanel()) : alert("الرقم السري خاطئ."); }
+        function logoutAdmin() { isAdminAuthenticated = false; showAuthView(); }
+        function renderCategoriesList() { document.getElementById("categoriesList").innerHTML = categories.map((cat, i) => `<div class="flex justify-between items-center bg-white p-3 rounded-xl border"><span class="font-semibold text-sm">${escapeHTML(cat)}</span><button onclick="deleteCategory(${i})" class="text-xs font-bold text-red-500">حذف</button></div>`).join("");}
+        function addNewCategory() { let input = document.getElementById("newCategoryInput"), val = input.value.trim(); if (val) { if (categories.map(c=>c.toLowerCase()).includes(val.toLowerCase())) { alert("هذا القسم موجود!"); } else { categories.push(val); localStorage.setItem("electrical_boq_categories", JSON.stringify(categories)); input.value = ""; renderCategoriesList(); populateCategoryDropdowns(); } } }
+        function deleteCategory(index) { let cat = categories[index]; if (confirm(`هل تريد حذف قسم "${cat}"؟`)) { categories.splice(index, 1); localStorage.setItem("electrical_boq_categories", JSON.stringify(categories)); renderCategoriesList(); populateCategoryDropdowns(); renderMasterItems(); } }
+        function changePassword() { let n = document.getElementById("newPass").value, c = document.getElementById("confirmPass").value; if (n && n === c) { adminPassword = n; localStorage.setItem("electrical_boq_pass", adminPassword); alert("تم تغيير الرقم السري!"); } else { alert("كلمة المرور غير متطابقة."); } }
+        function renderTrash() { let container = document.getElementById("trashContainer"); container.innerHTML = trash.length === 0 ? '<p class="text-center text-xs text-slate-400 p-4">السلة فارغة.</p>' : trash.map(p => `<div class="bg-white p-3 rounded-xl border flex justify-between items-center"><div class="text-xs"><p class="font-bold">${escapeHTML(p.projectName)}</p><p class="text-slate-400">${escapeHTML(p.projectArea)}</p></div><div class="flex gap-2"><button onclick="restoreProject(${p.projectId})" class="text-xs font-bold text-emerald-600">استعادة</button><button onclick="deletePermanently(${p.projectId})" class="text-xs font-bold text-red-500">حذف نهائي</button></div></div>`).join(""); }
+        function restoreProject(id) { let idx = trash.findIndex(p => p.projectId === id); if (idx > -1) { const [restored] = trash.splice(idx, 1); allProjects.unshift(restored); localStorage.setItem("electrical_boq_all_projects", JSON.stringify(allProjects)); localStorage.setItem("electrical_boq_trash", JSON.stringify(trash)); renderTrash(); renderProjectsList(); updateAllCounts(); renderMasterItems(); alert(`تم استعادة مشروع "${restored.projectName}"!`); } }
+        function deletePermanently(id) { if (confirm("تحذير: سيتم حذف المشروع نهائياً. هل أنت متأكد؟")) { trash = trash.filter(p => p.projectId !== id); localStorage.setItem("electrical_boq_trash", JSON.stringify(trash)); renderTrash(); } }
+        function exportData() { const data = { items, categories, allProjects, trash, password: adminPassword }; const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `BOQ_Backup_${new Date().toISOString().split("T")[0]}.json`; a.click(); URL.revokeObjectURL(url); }
+        function importData(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { try { const data = JSON.parse(e.target.result); if (!data || !Array.isArray(data.items) || !Array.isArray(data.categories) || !Array.isArray(data.allProjects)) throw new Error("ملف غير صالح."); if (confirm("سيتم استبدال جميع البيانات الحالية. متابعة؟")) { items = data.items; categories = data.categories; allProjects = data.allProjects; trash = data.trash || []; adminPassword = data.password || "1234"; localStorage.setItem("electrical_boq_items", JSON.stringify(items)); localStorage.setItem("electrical_boq_categories", JSON.stringify(categories)); localStorage.setItem("electrical_boq_all_projects", JSON.stringify(allProjects)); localStorage.setItem("electrical_boq_trash", JSON.stringify(trash)); localStorage.setItem("electrical_boq_pass", adminPassword); loadDataFromStorage(); populateCategoryDropdowns(); switchTab("master"); alert("تم الاستيراد بنجاح!"); } } catch (err) { alert(`فشل الاستيراد: ${err.message}`); } finally { event.target.value = ""; } }; reader.readAsText(file); }
+        function escapeHTML(str) { return String(str).replace(/[&<>"']/g, s => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[s])); }
+        
+        function openItemEditorForProject(itemId, isEdit = false) {
+            let item;
+            if (isEdit) {
+                const project = allProjects.find(p => p.projectId === currentProjectId);
+                item = project && project.items.find(i => i.id === itemId);
+            } else {
+                item = items.find(i => i.id === itemId);
+            }
+            if (!item) return alert("لم يتم العثور على البند.");
+            
+            const modalContainer = document.getElementById("editorModalContainer");
+            modalContainer.innerHTML = `
+                <div id="editorModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div class="bg-white w-full max-w-3xl rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95">
+                        <div class="p-6 border-b flex justify-between items-center bg-indigo-950 text-white rounded-t-3xl"><div><h3 class="text-xl font-bold">✏️ تخصيص صياغة البند</h3><p class="text-xs text-slate-300 mt-1">عدّل ونسّق النص ثم اضغط حفظ.</p></div><button onclick="closeEditorModal()" class="text-white hover:text-slate-200 font-bold text-xl">✕</button></div>
+                        <div class="p-4 bg-white">
+                            <div class="flex flex-wrap items-center gap-1.5 p-2 bg-slate-100 rounded-xl border mb-3">
+                                <button type="button" onclick="execEditorCommand('bold')" class="w-9 h-9 font-extrabold">B</button>
+                                <button type="button" onclick="execEditorCommand('italic')" class="w-9 h-9 italic">I</button>
+                                <button type="button" onclick="execEditorCommand('underline')" class="w-9 h-9 underline">U</button>
+                                <div class="w-[1px] h-6 bg-slate-300 mx-1"></div>
+                                <select onchange="execEditorCommand('fontSize', this.value); this.value='';"><option value="" disabled selected>الحجم</option><option value="3">صغير</option><option value="4">وسط</option><option value="5">كبير</option></select>
+                                <div class="w-[1px] h-6 bg-slate-300 mx-1"></div>
+                                <input type="color" onchange="execEditorCommand('foreColor', this.value)" class="w-7 h-7">
+                                <button type="button" onclick="execEditorCommand('removeFormat')" title="مسح التنسيق">🧹</button>
+                            </div>
+                            <div id="editorArea" contenteditable="true" class="w-full p-4 border rounded-2xl min-h-[250px] bg-slate-50 outline-none" dir="rtl"></div>
+                        </div>
+                        <div class="p-6 bg-slate-50 flex justify-end gap-3"><button onclick="closeEditorModal()" class="bg-slate-200 text-slate-700 px-6 py-2.5 rounded-xl">إلغاء</button><button onclick="confirmItemEdit(${itemId}, ${isEdit})" class="bg-indigo-600 text-white px-8 py-2.5 rounded-xl">تأكيد و${isEdit ? "حفظ" : "إضافة"}</button></div>
+                    </div>
+                </div>`;
+            document.getElementById("editorArea").innerHTML = item.description;
+        }
+        function execEditorCommand(command, value = null) { document.execCommand(command, false, value); document.getElementById("editorArea").focus(); }
+        function closeEditorModal() { document.getElementById("editorModalContainer").innerHTML = ""; }
+        function confirmItemEdit(itemId, isEdit) {
+            const projectIndex = allProjects.findIndex(p => p.projectId === currentProjectId);
+            if (projectIndex === -1) return alert("لا يوجد مشروع نشط.");
+            const newDescriptionHtml = document.getElementById("editorArea").innerHTML.trim();
+            if (!newDescriptionHtml) return alert("الوصف فارغ.");
+            if (isEdit) {
+                const itemIndex = allProjects[projectIndex].items.findIndex(i => i.id === itemId);
+                if (itemIndex !== -1) allProjects[projectIndex].items[itemIndex].description = newDescriptionHtml;
+            } else {
+                const originalItem = items.find(i => i.id === itemId);
+                if (originalItem) {
+                    allProjects[projectIndex].items.push({ ...originalItem, description: newDescriptionHtml, quantity: 1 });
+                }
+            }
+            localStorage.setItem("electrical_boq_all_projects", JSON.stringify(allProjects));
+            closeEditorModal();
+            renderPricingPage();
+            renderMasterItems();
+        }
+
+        // --- NEW & ROBUST Excel Export Function using ExcelJS ---
+        async function exportProjectToStyledExcel() {
+            try {
+                const project = allProjects.find(p => p.projectId === currentProjectId);
+                if (!project || project.items.length === 0) {
+                    alert("لا توجد بنود في المشروع لتصديرها!");
+                    return;
+                }
+
+                const workbook = new ExcelJS.Workbook();
+                const worksheet = workbook.addWorksheet('جدول الكميات', {
+                    pageSetup: { paperSize: 9, orientation: 'landscape' },
+                    views: [{ rightToLeft: true }]
+                });
+
+                // --- STYLES CONFIG (excel.json equivalent) ---
+                const excelStyles = {
+                    generalFont: { name: 'Arial', size: 10 },
+                    headerFill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF002060' } },
+                    headerFont: { name: 'Arial', size: 11, bold: true, color: { argb: 'FFFFFFFF' } },
+                    categoryFill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF8EA9DB' } },
+                    categoryFont: { name: 'Arial', size: 11, bold: true },
+                    border: { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } },
+                    centerAlign: { vertical: 'middle', horizontal: 'center', wrapText: true },
+                    rightAlign: { vertical: 'middle', horizontal: 'right', wrapText: true },
+                    totalFont: { name: 'Arial', size: 11, bold: true }
+                };
+
+                // --- Set Column Widths ---
+                worksheet.columns = [
+                    { key: 'total', width: 15 }, { key: 'price', width: 15 },
+                    { key: 'qty', width: 10 }, { key: 'unit', width: 12 },
+                    { key: 'desc', width: 80 }, { key: 'no', width: 8 }
+                ];
+                
+                // --- HEADER ROWS ---
+                worksheet.mergeCells('A1:F1');
+                const titleCell = worksheet.getCell('A1');
+                titleCell.value = "بنود اعمال الصيانة الشاملة";
+                titleCell.font = { name: 'Arial', size: 16, bold: true };
+                titleCell.alignment = { horizontal: 'center' };
+
+                worksheet.mergeCells('D2:F2');
+                worksheet.getCell('D2').value = `اسم المشروع: ${project.projectName || ""}`;
+                worksheet.mergeCells('D3:F3');
+                worksheet.getCell('D3').value = `موقع المشروع: ${project.projectArea || ""}`;
+                
+                worksheet.mergeCells('A5:F5');
+                worksheet.getCell('A5').value = "ملحوظة هامة: جميع البنود تشمل ومحمل عليها إزالة كل ما يعيق ويتعارض مع تنفيذ الأعمال، وإعادة ترميم وتشغيل الأجزاء والأجهزة المتأثرة بالأعمال ورد الشيء لأصله.";
+                worksheet.getCell('A5').alignment = { wrapText: true };
+                
+                const headerRow = worksheet.addRow(["الجملة", "الفئة", "الكمية", "الوحدة", "بيــان الأعمــال", "م"]);
+                headerRow.eachCell(cell => {
+                    cell.fill = excelStyles.headerFill;
+                    cell.font = excelStyles.headerFont;
+                    cell.alignment = excelStyles.centerAlign;
+                    cell.border = excelStyles.border;
+                });
+
+                // --- DATA ROWS ---
+                const groupedItems = project.items.reduce((acc, item) => {
+                    (acc[item.category] = acc[item.category] || []).push(item);
+                    return acc;
+                }, {});
+
+                let itemCounter = 1;
+                let grandTotal = 0;
+
+                for (const category in groupedItems) {
+                    const categoryRow = worksheet.addRow([null, null, null, null, `أعمال ${category}`]);
+                    worksheet.mergeCells(categoryRow.number, 1, categoryRow.number, 5);
+                    const categoryCell = categoryRow.getCell(5);
+                    categoryCell.fill = excelStyles.categoryFill;
+                    categoryCell.font = excelStyles.categoryFont;
+                    categoryCell.alignment = { vertical: 'middle', horizontal: 'right' };
+                    categoryCell.border = excelStyles.border;
+                    categoryRow.getCell(6).border = excelStyles.border;
+
+
+                    groupedItems[category].forEach(item => {
+                        const cleanDescription = (item.description || "").replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, ' ').trim();
+                        const itemTotal = (item.price || 0) * (item.quantity || 0);
+                        grandTotal += itemTotal;
+                        
+                        const itemRow = worksheet.addRow([
+                            itemTotal, item.price, item.quantity,
+                            item.unit, cleanDescription, itemCounter++
+                        ]);
+
+                        itemRow.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+                            cell.font = excelStyles.generalFont;
+                            cell.border = excelStyles.border;
+                             // Apply wrap text to description
+                            if (colNumber === 5) {
+                                cell.alignment = excelStyles.rightAlign;
+                            } else {
+                                cell.alignment = excelStyles.centerAlign;
+                            }
+                        });
+                        itemRow.getCell(1).numFmt = '#,##0.00';
+                        itemRow.getCell(2).numFmt = '#,##0.00';
+                    });
+                }
+                
+                // --- FOOTER ROW ---
+                const totalRow = worksheet.addRow([grandTotal, null, null, null, "الإجمالي الكلي (ر.ق):"]);
+                totalRow.getCell(1).numFmt = '#,##0.00';
+                totalRow.getCell(1).font = excelStyles.totalFont;
+                totalRow.getCell(5).font = excelStyles.totalFont;
+                totalRow.getCell(1).alignment = {horizontal: 'right'};
+                totalRow.getCell(5).alignment = {horizontal: 'right'};
+
+                // --- SAVE FILE ---
+                const buffer = await workbook.xlsx.writeBuffer();
+                const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `جدول كميات - ${project.projectName}.xlsx`;
+                link.click();
+                URL.revokeObjectURL(link.href);
+
+            } catch (error) {
+                console.error("Failed to export Excel file:", error);
+                alert("حدث خطأ أثناء محاولة تصدير الملف. يرجى مراجعة الكونسول لمزيد من التفاصيل.");
+            }
+        }
+
+    </script>
+</body>
+</html>
